@@ -51,6 +51,7 @@ The Exner equation is solved on a finite area mesh, which is a mesh made of fini
 - Matthias Renaud
 - Cyrille Bonamy
 - Julien Chauchat
+- Olivier Bertrand
 
 
 ## Acknowledgements

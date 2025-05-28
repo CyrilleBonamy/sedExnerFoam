@@ -29,6 +29,12 @@ pointVectorField& pointDisplacement = const_cast<pointVectorField&>
 );
 
 vectorField& dispVals = dispValsPtr.ref();
+for (const label patchID : bed.bedPatchesID())
+{
+    dispVals = pointDisplacement.boundaryFieldRef()[patchID].patchInternalField();
+}
+
+
 scalarField& dHpoints = dHpointsPtr.ref();
 dHpoints = Zero;
 

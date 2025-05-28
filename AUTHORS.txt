@@ -6,3 +6,5 @@ AUTHORS
    Cyrille.Bonamy (A) univ-grenoble-alpes.fr
  * Julien Chauchat (LEGI OXALIA UGA/GINP/CNRS UMR 5519 - Grenoble - France)
    Julien.Chauchat (A) univ-grenoble-alpes.fr
+ * Olivier Bertrand (ARTELIA Group - Grenoble - France)
+   Olivier.BERTRAND (A) arteliagroup.com

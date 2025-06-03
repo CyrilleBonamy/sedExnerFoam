@@ -79,39 +79,44 @@ if (Tsat)
     Info << "n faces = " << Nf << endl;
 
     scalarSquareMatrix Amat(meshProj.nFaces());
+    scalarSquareMatrix Amatinv(Nf, Zero);
     Amat = Zero;
-
-    scalar dl = 0;
-    for (label edgei = 0; edgei < meshProj.nInternalEdges(); edgei++)
-    {
-        scalar newdl = Foam::mag(
-            xFacesProj[neighbour[edgei]] - xFacesProj[owner[edgei]]);
-        if (newdl>dl)
-        {
-            dl = newdl;
-        }
-    }
-    Info << "dl = " << dl << endl;
-    scalar Mcoef = Lsat->value() / (2*dl);
-    Info << "Mcoef = " << Mcoef << endl;
     scalarField qsx(Nf);
-
-    for (label i=1; i<Nf-1; i++)
+    if (Nf!=0)
     {
-        Amat[i][i] = 1;
-        Amat[i][i+1] = Mcoef;
-        Amat[i][i-1] = -Mcoef;
-        qsx[i] = qsat[i].x();
+        scalar dl = 0;
+        for (label edgei = 0; edgei < meshProj.nInternalEdges(); edgei++)
+        {
+            scalar newdl = Foam::mag(
+                xFacesProj[neighbour[edgei]] - xFacesProj[owner[edgei]]);
+            if (newdl>dl)
+            {
+                dl = newdl;
+            }
+        }
+        Info << "dl = " << dl << endl;
+        scalar Mcoef = Lsat->value() / (2*dl);
+        Info << "Mcoef = " << Mcoef << endl;
+
+        for (label i=1; i<Nf-1; i++)
+        {
+            Amat[i][i] = 1;
+            Amat[i][i+1] = Mcoef;
+            Amat[i][i-1] = -Mcoef;
+            qsx[i] = qsat[i].x();
+        }
+        Amat[0][0] = 1 - Mcoef;
+        Amat[0][1] = Mcoef;
+        Amat[Nf-1][Nf-1] = 1 + Mcoef;
+        Amat[Nf-1][Nf-2] = -Mcoef;
+        qsx[0] = qsat[0].x();
+        qsx[Nf-1] = qsat[Nf-1].x();
     }
-    Amat[0][0] = 1 - Mcoef;
-    Amat[0][1] = Mcoef;
-    Amat[Nf-1][Nf-1] = 1 + Mcoef;
-    Amat[Nf-1][Nf-2] = -Mcoef;
-    qsx[0] = qsat[0].x();
-    qsx[Nf-1] = qsat[Nf-1].x();
 
     LUscalarMatrix LU(Amat);
-    scalarField qbx(LU.solve(qsx));
+    //scalarField qbx(LU.solve(qsx));
+    LU.inv(Amatinv);
+    scalarField qbx(Amatinv*qsx);
 
     forAll(meshProj.S(), facei)
     {

@@ -544,7 +544,7 @@ if (bed.exist())
                         runTime.timeName(),
                         bed.aMesh(),
                         IOobject::MUST_READ,
-                        IOobject::NO_WRITE
+                        IOobject::AUTO_WRITE
                     ),
                     bed.aMesh()
                 )

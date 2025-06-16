@@ -34,6 +34,7 @@ EinNum = np.sqrt((rhoS/rhoF - 1) * g * dS**3)
 
 
 def qbVanRijn(sh, csh):
+    """van Rijn bedload formula"""
     Tshear = (sh / csh - 1)
     return EinNum * 0.053 * Tshear**2.1 / Dstar**0.3
 
@@ -77,7 +78,7 @@ if errCritSh > tolCritSh:
         + f"{100*errCritSh} %")
     print(f"tolerance is {100*tolCritSh} %")
 else:
-    print("critical Shields value OK")
+    print(f"critical Shields value OK, relative error {errCritSh}")
 
 # relative error on bedload
 errQb = np.abs((qb - qbVR) / qbVR)
@@ -88,7 +89,7 @@ if errQb > tolQb:
         + f"{100*errQb} %")
     print(f"tolerance is {100*tolQb} %")
 else:
-    print("bedload value OK")
+    print(f"bedload value OK, relative error {errQb}")
 
 for i, t in enumerate(timeList):
     zb = rdf.readmesh("./", t, boundary="bed", verbose=False)[2][0]
@@ -107,7 +108,7 @@ for i, t in enumerate(timeList):
 
 Mtotal = Msusp + Mbed
 errMass = np.abs(Mtotal) / np.max(Msusp)
-endSimuErr = errMass[-1]
+endSimuErr = errMass[-1]  # relative error on mass at t=Tend
 
 # test conservation of mass
 if endSimuErr > tolMass:
@@ -115,6 +116,6 @@ if endSimuErr > tolMass:
     print(f"error! maximum relative error on mass: {100*endSimuErr} %")
     print(f"tolerance is {100*tolMass} %")
 else:
-    print("mass conservation OK")
+    print(f"mass conservation OK, relative error {endSimuErr}")
 
 assert success

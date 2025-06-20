@@ -11,7 +11,9 @@ import os
 print(" --- running sedimentation mass conservation --- ")
 
 success = True
-tol = 1e-5
+tolCs = 1e-5
+tolMass = 1e-5
+tolZ = 1e-5
 
 # load previous results to track change in solver behavior
 zpr, *csAllTime = np.loadtxt(
@@ -46,7 +48,7 @@ if len(zpr) != ncells:
     print("error, mesh cell number differs from previous results")
 
 errZ = np.max(zpr - Zcells)/domHeight
-if errZ > tol:
+if errZ > tolZ:
     success = False
     print("cell position differs from previous results, "
           + f"relative error is {100*zpr} %, "
@@ -98,27 +100,27 @@ for i in range(ntimes-1):
     # compare Cs field with previous results
     csPrev = csAllTime[i]
     errCs = np.max(np.abs(csPrev - Cs) / Cs0)
-    if errCs > tol:
+    if errCs > tolCs:
         success = False
         print(
             f"error! maximum relative error on cs: {100*errCs} %"
-            + f"tolerance is {100*tol} %")
+            + f"tolerance is {100*tolCs} %")
 
 if success:
-    print("Cs values OK")
+    print("Cs values OK, relative error not exceeding {tolCs}")
 
 
 totMass = massBed + massSuspension
 # relative mass gain or loss
-relMassErr = np.max(np.abs(totMass - totMass[0]) / totMass[0])
+maxRelMassErr = np.max(np.abs(totMass - totMass[0]) / totMass[0])
 
 # test conservation of mass
-if relMassErr > tol:
+if maxRelMassErr > tolMass:
     success = False
     print(f"error! maximum relative error on mass: {100*relMassErr} %")
     print(f"tolerance is {100*tol} %")
 else:
-    print("mass conservation OK")
+    print(f"mass conservation OK, maximum relative error {maxRelMassErr}")
 
 
 assert success

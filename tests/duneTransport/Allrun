@@ -4,7 +4,7 @@
 blockMesh
 
 # initial bathymetry
-python coneCreateGeom.py
+python createDuneGeom.py
 # finite area mesh
 makeFaMesh
 

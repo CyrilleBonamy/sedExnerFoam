@@ -1,0 +1,52 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2506                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      bedloadProperties;
+}
+
+// ************************** sediment properties ************************** //
+
+sedimentBed             on;  // on or off
+
+bedMotion               off;
+
+sedimentBedPatches     (bed);
+
+fixedFaPatches         (inletFa outletFa);
+
+ABorder                1;
+
+bedloadModel
+{
+    type               MeyerPeter;
+
+    avalanche          on;
+    Qav                1e-4;
+}
+
+criticalShieldsModel
+{
+    type               Soulsby;
+    slopeCorrection    on;
+}
+
+saturation
+{
+    type               explicit;
+    Tsat               0.02;
+    Lsat               5e-3;
+}
+
+rigidBed               on;
+
+// ************************************************************************* //

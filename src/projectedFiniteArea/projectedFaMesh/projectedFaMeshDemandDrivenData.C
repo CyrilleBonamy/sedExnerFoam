@@ -62,6 +62,7 @@ void Foam::projectedFaMesh::calcLe() const
 
     vectorField& LeProj = *LePtr_;
 
+    // internal edges
     forAll(Le, edgei)
     {
         const edge& e = edges[edgei];
@@ -74,6 +75,25 @@ void Foam::projectedFaMesh::calcLe() const
         // length of projected edge on horizontal plane
         scalar le = mag(projectHPlane(x1 - x2, projectNormal_));
         LeProj[edgei] = le * edgeNormal;
+    }
+    // boundary edges
+    forAll(mesh_.boundary(), patchi)
+    {
+        const faePatchField<Vector<scalar>>& LeBound =
+            mesh_.Le().boundaryField()[patchi];
+        label edgei = mesh_.boundary()[patchi].start();
+        forAll(mesh_.boundary()[patchi], patchEdgei)
+        {
+            const edge& e = edges[edgei];
+            vector edgeNormal = projectHPlane(
+                LeBound[patchEdgei], projectNormal_).normalise();
+            // vertex delimiting the edge
+            const point& x1 = points[e.start()];
+            const point& x2 = points[e.end()];
+            scalar le = mag(projectHPlane(x1 - x2, projectNormal_));
+            LeProj[edgei] = le * edgeNormal;
+            edgei++;
+        }
     }
 }
 

@@ -15,33 +15,39 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-suspension     on;
+suspension         on;
 
 fallModel
 {
     //  choose a model to compute terminal falling velocity of sediment
     // options are Fredsoe, 
-    type   Fredsoe;
+    type           Fredsoe;
 }
 
 hindranceModel
 {
     // choose an hindrance model, options are none, Zaki or ZakiModified
-    type   none;
+    type           none;
     // for model Zaki and ZakiModified, a coefficient n must be specified
-    n      4.65;
+    n              4.65;
 }
+
+// diffusivity for suspended sediments: options are: turbulent, effective
+// turbulent: diffSed = nut / Sc
+// effective: diffSed = (nut + nu) / Sc
+// default is turbulent
+diffusivity        turbulent;
 
 // near wall additional diffusivity for Cs (saltation effect)
 // 
 wallDiffusivity
 {
-    alpha  5e-6;  //
-    beta   5;  //
+    alpha          5e-6;  //
+    beta           5;  //
 }
 
 // maximum possible value of reference concentration for erosion
 // default is 0.3, acceptable values are 0.1 - 0.3
-CsbMax     0.3;
+CsbMax             0.3;
 
 // ************************************************************************** //

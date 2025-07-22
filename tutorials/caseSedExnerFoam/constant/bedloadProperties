@@ -85,8 +85,16 @@ criticalShieldsModel
 // sedExnerFoam run without using saturation if dict not present
 saturation
 {
+    // possible types: 1Dimplicit, explicit, default is explicit
+    // 1Dimplicit solve equation Lsat dqb/dx = qsat - qb implicitly
+    // it works only on uniform 1 horizontal direction case
+    // explicit: explictly solve equation
+    // Tsat dqb/dt + nabla(Lsat qb) = qsat - qb
+    type               1Dimplicit;
     // saturation time, typically 10 ms
     Tsat               0.01;
+    // saturation length
+    Lsat               0.003;
 }
 
 // morphological acceleration factor

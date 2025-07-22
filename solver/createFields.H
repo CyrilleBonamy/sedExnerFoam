@@ -181,6 +181,10 @@ if (isWallDiff)
         << "alpha = " << epsWall0.value()
         << ", beta = " << betaWall.value() << endl;
 }
+else
+{
+    Info << "wall diffusivity off" << endl;
+}
 
 // maximum reference concentration for erosion condition
 // sediment vol fraction, default is 0.3 , user modifiable

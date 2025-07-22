@@ -69,11 +69,14 @@ bool readCritShields = false;
 bool onEdgeAvalanche = false;
 
 // saturated length and time
+word saturationType("none");  // implicit1D or explicit
 dimensionedScalar* Tsat = nullptr;  // pointer to saturation time
 dimensionedScalar* Lsat = nullptr;  // pointer to saturation length
 if (bedloadProperties.found("saturation"))
 {
     const dictionary& satDict = bedloadProperties.subDict("saturation");
+    saturationType = satDict.lookupOrDefault<word>("type", "explicit");
+    Info << "saturation on, " << saturationType << endl;
     Tsat = new dimensionedScalar(
         dimensionSet(0, 0, 1, 0, 0, 0, 0),
         readScalar(satDict.lookup("Tsat")));
@@ -127,8 +130,8 @@ bool filterShields = false;
 bool filterExner = false;
 
 // for exner equation, filterering bed elevation increment
-scalar alphaExn = 0;
-label NExn = 0;
+//scalar alphaExn = 0;
+//label NExn = 0;
 
 if (bed.exist())
 {
@@ -152,10 +155,10 @@ if (bed.exist())
     if (switchFilterShields == "on")
     {
         filterExner = true;
-        alphaExn = bedloadProperties.lookupOrDefault<scalar>(
-            "alphaFiltExner", 0.1);
-        NExn = bedloadProperties.lookupOrDefault<label>(
-            "NfiltExner", 1);
+        //alphaExn = bedloadProperties.lookupOrDefault<scalar>(
+        //    "alphaFiltExner", 0.1);
+        //NExn = bedloadProperties.lookupOrDefault<label>(
+        //    "NfiltExner", 1);
     }
     else if (switchFilterExner != "off")
     {

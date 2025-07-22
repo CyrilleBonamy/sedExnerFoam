@@ -32,11 +32,7 @@ const scalarField& SfProj = meshProj.S();
 
 #include "balanceBedload.H"
 
-Info << "bedload balanced" << endl;
-
 //#include "bedFormVelocity.H"
-
-Info << "bedform velocity computed" << endl;
 
 if (switchSuspension=="on")
 {

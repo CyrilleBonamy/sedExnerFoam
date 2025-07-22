@@ -58,9 +58,10 @@ if (not readCritShields)
 qsat = bedloadMod.qb(
     shields, critShields, gradZb, rhoS, rhoF, mag(g), dS, nuF);
 
+qb.correctBoundaryConditions();
+
 // apply saturation time to compute bedload
-const scalar& deltaT = runTime.time().deltaT().value();
-if (Tsat)
+if (saturationType == "implicit1D")
 {
     //if (Tsat->value() > deltaT)
     //{
@@ -91,9 +92,7 @@ if (Tsat)
             dl = newdl;
         }
     }
-    Info << "dl = " << dl << endl;
     scalar Mcoef = Lsat->value() / (2*dl);
-    Info << "Mcoef = " << Mcoef << endl;
     scalarField qsx(Nf);
 
     for (label i=1; i<Nf-1; i++)
@@ -118,15 +117,122 @@ if (Tsat)
         qb[facei].x() = qbx[facei];
     }
 }
-else
+else if (saturationType == "explicit")
+{
+    // time step
+    const scalar& deltaT = runTime.time().deltaT().value();
+    scalar TsatLim = 5 * deltaT;
+    scalar TsatCorr = max(Tsat->value(), 5 * deltaT);
+    if (Tsat->value() < TsatLim)
+    {
+        Info << "WARNING: Tsat < TsatLim, new Tsat = " << TsatCorr << endl;
+    }
+    // access to projected faMesh
+    const projectedFaMesh& meshProj = bed.aProjMesh();
+    // projected face centers coordinates
+    const vectorField& xFacesProj = meshProj.areaCentres();
+    // projected edge centers coordinates
+    const vectorField& xEdgesProj = meshProj.edgeCentres();
+    // projected edge vectors, oriented toward owner face
+    const vectorField& LeProj = meshProj.Le();
+    //Info << "Le: " << LeProj << endl;
+    // area of projected mesh faces
+    const scalarField& SfProj = meshProj.S();
+    // face owner list
+    const labelList& owner = meshProj.edgeOwner();
+    // face neighbour list
+    const labelList& neighbour = meshProj.edgeNeighbour();
+
+    // project qb on horizontal plane
+    const vectorField qbProjOld = meshProj.project(qb);
+
+    // project qsat on horizontal plane
+    const vectorField qsatProj = meshProj.project(qsat);
+
+    // new projected bedload values
+    vectorField qbProj = meshProj.project(qb);
+
+    // saturation equation, internal edges contribution
+    for (label edgei = 0; edgei < meshProj.nInternalEdges(); edgei++)
+    {
+        // distance between edgei center and owner face center
+        scalar distOwner =
+            Foam::mag(xFacesProj[owner[edgei]] - xEdgesProj[edgei]);
+        // distance between edgei center and neighbour center
+        scalar distNeighbour =
+            Foam::mag(xFacesProj[neighbour[edgei]] - xEdgesProj[edgei]);
+        // linear interpolate qb on edge i
+        vector qbEdgei =
+            (
+                distNeighbour * qbProjOld[owner[edgei]]
+                + distOwner * qbProjOld[neighbour[edgei]]
+            )
+            * (1 / (distOwner + distNeighbour));
+
+        vector divLsQb = (deltaT * Lsat->value() / TsatCorr)
+            * (qbEdgei & LeProj[edgei])
+            * (qbEdgei / (Foam::mag(qbEdgei) + SMALL));
+
+        qbProj[owner[edgei]] -= divLsQb / SfProj[owner[edgei]];
+
+        qbProj[neighbour[edgei]] += divLsQb / SfProj[neighbour[edgei]];
+    }
+    qbProj += (deltaT / TsatCorr) * (qsatProj - qbProjOld);
+
+    // saturation equation, boundary edges contribution, BC
+    forAll(bed.aMesh().boundary(), patchi)
+    {
+        const faPatchField<Vector<scalar>>& QbBound =
+            qb.boundaryField()[patchi];
+
+        if (bed.aMesh().boundary()[patchi].type() != "empty")
+        {
+            // faMesh edge adressing
+            label edgei = bed.aMesh().boundary()[patchi].start();
+            forAll(bed.aMesh().boundary()[patchi], patchEdgei)
+            {
+                // linear interpolation from face to edge
+                vector qbEdgei = meshProj.project(QbBound[patchEdgei]);
+                vector divLsQb = (deltaT * Lsat->value() / TsatCorr)
+                    * (qbEdgei & LeProj[edgei])
+                    * (qbEdgei / (Foam::mag(qbEdgei) + SMALL));
+                qbProj[owner[edgei]] -= divLsQb / SfProj[owner[edgei]];
+                edgei++;
+            }
+        }
+    }
+
+    // normal to faMesh faces
+    const vectorField& nFaces =
+        bed.aMesh().faceAreaNormals().internalField();
+
+    // reconstruct qb from qbProj on bed surface
+    forAll(meshProj.S(), facei)
+    {
+        /*const vector& nf = nFaces[facei]; 
+        vector qbReproj = qbProj[facei] - nf * (qbProj[facei] & nf);
+        qbReproj *= Foam::mag(qbProj[facei]) / (Foam::mag(qbReproj) + SMALL);
+            qb[facei] = qbReproj;*/
+        qb[facei] = qbProj[facei];
+    }
+}
+else if (saturationType == "none")
 {
     qb = qsat;
 }
+else
+{
+    FatalError << "in bedloadProperties/saturation,"
+        << "wrong keyword for entry type "
+        << saturationType
+        << "\nvalid options are: 1Dimplicit explicit" << endl;
+    Info << abort(FatalError) << endl;
+}
+
+qb.correctBoundaryConditions();
 
 // additional bedload due to avalanche
 if (bedloadMod.avalanche())
 {
     #include "sedimAvalanche.H"
 }
-
-qb.correctBoundaryConditions();

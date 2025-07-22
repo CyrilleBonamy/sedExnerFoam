@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2312                                 |
+|  \\    /   O peration     | Version:  v2506                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,7 +17,7 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 1e-6;
+internalField   uniform 1e-4;
 
 boundaryField
 {
@@ -35,8 +35,7 @@ boundaryField
     }
     bed
     {
-        type 		kqRWallFunction;
-        value           $internalField;
+        type 		zeroGradient;
     }
     frontAndBackPlanes
     {

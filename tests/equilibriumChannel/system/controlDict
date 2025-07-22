@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2312                                 |
+|  \\    /   O peration     | Version:  v2506                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -54,10 +54,7 @@ maxAlphaCo      1;
 maxDeltaT       1e0;
 
 libs (
-    "libWilcoxOmegaWallFunction.so"
-     "libOpenFOAM.so"
-     "libsimpleSwakFunctionObjects.so"
-     "libswakFunctionObjects.so"
+    "libroughWallFunctions.so"
      );
 
 functions

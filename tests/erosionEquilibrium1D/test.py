@@ -61,11 +61,11 @@ critShMiedema = (0.2285 / Dstar**1.02) + 0.0575 * (
 
 # Shields number
 shields = rdf.readvector(
-    "./", "10", "shieldsVf", boundary="bed", verbose=False)[0]
+    "./", "10", "shieldsVf", boundary="bed", verbose=False)[0, 0]
 
 # bedload
 qb = rdf.readvector(
-    "./", "10", "qbVf", boundary="bed", verbose=False)[0]
+    "./", "10", "qbVf", boundary="bed", verbose=False)[0, 0]
 
 qbVR = qbVanRijn(shields, critShields)
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2312                                 |
+|  \\    /   O peration     | Version:  v2506                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -36,8 +36,8 @@ boundaryField
     }
     bed
     {
-        kn              0.5e-3;
-        type            wilcoxOmegaWallFunction;
+        type            fuhrmanOmegaWallFunction;
+        kn              5e-3;
         value           $internalField;
     }
     frontAndBackPlanes

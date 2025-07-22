@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2312                                 |
+|  \\    /   O peration     | Version:  v2506                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -29,7 +29,7 @@ divSchemes
 {
     default         none;
 // UEqn
-    div(phi,U)    Gauss limitedLinearV 1;
+    div(phi,U)    Gauss linear;
 // CsEqn
     div(phip,Cs)   Gauss upwind phip;
 // pEqn
@@ -44,22 +44,20 @@ laplacianSchemes
 {
     default         none;
 // UEqn
-    laplacian(nuEff,U) Gauss linear corrected;
+    laplacian(nuEff,U) Gauss linear orthogonal;
 // pEqn
-    laplacian((1|A(U)),p) Gauss linear corrected;
+    laplacian((1|A(U)),p) Gauss linear orthogonal;
 // CsEqn
-    laplacian(diffSed,Cs) Gauss linear corrected;
+    laplacian(diffSed,Cs) Gauss linear orthogonal;
 // k and EpsilonEqn 
-    laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(DkEff,beta) Gauss linear corrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear corrected;
-    laplacian(DepsilonEff,beta) Gauss linear corrected;
-    laplacian(DomegaEff,omega) Gauss linear corrected;
+    laplacian(DkEff,k) Gauss linear orthogonal;
+    laplacian(DkEff,beta) Gauss linear orthogonal;
+    laplacian(DomegaEff,omega) Gauss linear orthogonal;
 }
 
 interpolationSchemes
 {
-    default  linear;
+    default         linear;
 }
 
 snGradSchemes
@@ -74,7 +72,7 @@ fluxRequired
 }
 wallDist
 {
-method meshWave;
+    method meshWave;
 }
 
 

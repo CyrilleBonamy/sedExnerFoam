@@ -1,1 +1,1 @@
-./1DSedim ./equilibriumChannel ./sedimMassConservation1D ./sedimMassConservation1D_tilted ./slopeAvalanche onEdgeSlopeAvalanche ./pyCompare/AB0avalanche ./pyCompare/AB1avalanche ./pyCompare/duneTransport erosionEquilibrium1D erosionEquilibrium1D_tilted ./pyCompare/sedim1D ./pyCompare/sedim2D
+./1DSedim ./equilibriumChannel ./sedimMassConservation1D ./sedimMassConservation1D_tilted ./slopeAvalanche onEdgeSlopeAvalanche ./pyCompare/AB0avalanche ./pyCompare/AB1avalanche ./duneTransport erosionEquilibrium1D erosionEquilibrium1D_tilted ./pyCompare/sedim1D ./pyCompare/sedim2D

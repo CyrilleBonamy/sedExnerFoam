@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2312                                 |
+|  \\    /   O peration     | Version:  v2506                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -31,12 +31,13 @@ boundaryField
     }
     top
     {
-        type            zeroGradient;
+        type            calculated;
+	value           uniform 0;
     }
     bed
     {
-        type            nutkWallFunction;
-	value           uniform 0;
+        type            calculated;
+        value           uniform 0;
     }
     frontAndBackPlanes
     {

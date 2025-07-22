@@ -5,12 +5,24 @@ turbulent kinetic energy and the volume fraction of suspended sediments
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 from fluidfoam import readof as rdf
 import os
 
 plt.rcParams["font.size"] = 15
+plt.rcParams["lines.linewidth"] = 2.
 
 time = "50"
+
+foamTimes = os.popen("foamListTimes").read()
+timeList = foamTimes.split("\n")[:-1]
+timeArr = np.array([float(t) for t in timeList])
+ntimes = len(timeList)
+# color list for results
+colors = ["cornflowerblue", "tomato"]
+cm = LinearSegmentedColormap.from_list(
+        "Custom", colors, N=ntimes)
+colors = cm(np.arange(0, cm.N))
 
 # simulation parameters
 Hwater = 0.1  # water depth
@@ -56,8 +68,6 @@ def RouseProfile(z, z0, c0, Ro):
 Zmesh = rdf.readmesh("./")[2]
 # x component of velocity field
 UxField = rdf.readfield("./", time, "U")[0]
-# turbulent kinetic energy
-kField = rdf.readscalar("./", time, "k")
 omegaField = rdf.readscalar("./", time, "omega")
 nutField = rdf.readscalar("./", time, "nut")
 diffSed = rdf.readscalar("./", time, "diffSed")
@@ -90,21 +100,23 @@ print("\nsimulation mean velocity: ", getUmean(UxField, Zmesh), "m/s")
 # load results from prevous simulation
 zData, CsData = np.loadtxt(
     "./dataCs_50s.txt", unpack=True, delimiter=";")
+# interpolate sim results on experimental data grid
+CsInterp = np.interp(zData, Zmesh, CsField)
 # relative error on Cs profile
-errCs = np.abs(CsField - CsData) / CsData
+errCs = np.abs(CsInterp - CsData) / CsData
 
 
-fig, (axU, axNut, axK, axCs, axErr) = plt.subplots(
-    ncols=5, figsize=(16, 6))
+fig, (axU, axNut, axK, axOm, axCs, axErr) = plt.subplots(
+    ncols=6, figsize=(18, 6))
 
-axU.plot(UxField, Zmesh/Hwater, lw=2, color="steelblue")
+axU.plot(UxField, Zmesh/Hwater, color="steelblue")
 axU.set_xlabel("U [m/s]")
 axU.set_ylabel("z/H")
 axU.grid()
 
-axNut.plot(nutField, Zmesh/Hwater, lw=2, color="steelblue", label=r"$\nu_t$")
+axNut.plot(nutField, Zmesh/Hwater, color="steelblue", label=r"$\nu_t$")
 axNut.plot(
-    diffSed, Zmesh/Hwater, lw=2, ls="dashed", color="firebrick",
+    diffSed, Zmesh/Hwater, ls="dashed", color="firebrick",
     label=r"$\nu_t/\sigma_c + \epsilon_{wall}$")
 axNut.axhline(ks/Hwater, ls="dashed", color="black", label=r"$k_s$")
 axNut.axhline(dVisc/Hwater, ls="dashed", color="black", label=r"$\delta_v$")
@@ -112,17 +124,31 @@ axNut.set_xlabel(r"diffusivity $[m^2.s^{-1}$")
 axNut.legend()
 axNut.grid()
 
-axK.plot(kField, Zmesh/Hwater, lw=2, color="steelblue")
+for i, t in enumerate(timeList):
+    kField = rdf.readscalar("./", t, "k")
+    axK.plot(kField, Zmesh/Hwater, color=colors[i])
+kBC = rdf.readscalar("./", time, "k", verbose=False, boundary="bed")
+axK.scatter(kBC, 0, color="red")
 axK.set_xlabel(r"$k\,[m^2.s^{-2}]$")
 axK.grid()
 
-axCs.scatter(CsField, Zmesh/Hwater, lw=2, color="steelblue")
-axCs.scatter(CsData, zData/Hwater, marker="x", color="black")
+omBC = rdf.readscalar("./", time, "omega", verbose=False, boundary="bed")
+axOm.plot(omegaField, Zmesh/Hwater, color="#0072B2")
+axOm.scatter(omBC, 0, color="red")
+axOm.set_xlabel(r"$\omega\,[s^{-1}]$")
+axOm.set_xscale("log")
+axOm.grid()
+
+axCs.scatter(
+    CsField, Zmesh/Hwater, color="steelblue", label="sedExnerFoam")
+axCs.scatter(
+    CsData, zData/Hwater, marker="x", color="black", label="previous results")
 axCs.set_xlabel(r"$c_s$")
 axCs.set_xscale("log")
+axCs.legend()
 axCs.grid()
 
-axErr.plot(errCs, Zmesh/Hwater, marker="x", color="steelblue")
+axErr.plot(errCs, zData/Hwater, marker="x", color="steelblue")
 axErr.set_xlabel(r"$c_s$ relative error")
 axErr.grid()
 
@@ -130,5 +156,24 @@ for ax in fig.axes[1:]:
     ax.set_yticklabels([])
 
 fig.tight_layout()
+
+# plot friction velocity time evolution
+fig2, axUstar = plt.subplots(figsize=(8.3, 6))
+ustarArr = np.zeros(ntimes)
+
+for i, t in enumerate(timeList):
+    # wall shear stress
+    tauX = rdf.readvector(
+        "./", t, "wallShearStress", boundary="bed", verbose=False)[0, 0]
+    ustar = np.sqrt(np.abs(tauX))
+    ustarArr[i] = ustar
+
+axUstar.plot(
+    timeArr, ustarArr, marker="x", color="#0072B2")
+axUstar.set_xlabel(r"time in s")
+axUstar.set_ylabel(r"$u_*\,[m.s^{-1}]$")
+axUstar.grid()
+
+fig2.tight_layout()
 
 plt.show()

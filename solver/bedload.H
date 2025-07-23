@@ -121,8 +121,8 @@ else if (saturationType == "explicit")
 {
     // time step
     const scalar& deltaT = runTime.time().deltaT().value();
-    scalar TsatLim = 5 * deltaT;
-    scalar TsatCorr = max(Tsat->value(), 5 * deltaT);
+    scalar TsatLim = 2 * deltaT;
+    scalar TsatCorr = max(Tsat->value(), 2 * deltaT);
     if (Tsat->value() < TsatLim)
     {
         Info << "WARNING: Tsat < TsatLim, new Tsat = " << TsatCorr << endl;
@@ -209,7 +209,7 @@ else if (saturationType == "explicit")
     // reconstruct qb from qbProj on bed surface
     forAll(meshProj.S(), facei)
     {
-        /*const vector& nf = nFaces[facei]; 
+        /*const vector& nf = nFaces[facei];
         vector qbReproj = qbProj[facei] - nf * (qbProj[facei] & nf);
         qbReproj *= Foam::mag(qbProj[facei]) / (Foam::mag(qbReproj) + SMALL);
             qb[facei] = qbReproj;*/

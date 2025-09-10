@@ -11,4 +11,4 @@ EXE_INC = \
     -I../lnInclude
 
 LIB_LIBS = \
-    -L$(FOAM_USER_LIBBIN)\
+    -L$(FOAM_USER_LIBBIN)

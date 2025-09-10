@@ -67,7 +67,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
-#include "CorrectPhi.H"
+#include "cfdTools/general/CorrectPhi/CorrectPhi.H"
 #include "fvOptions.H"
 #include "localEulerDdtScheme.H"
 #include "unitConversion.H"
@@ -205,13 +205,15 @@ int main(int argc, char *argv[])
                 turbulence->correct();
             }
         }
-
+        Info << "before bed.exist" << endl;
         if (bed.exist())
         {
             #include "bedShearStress.H"
+        Info << "before bedload" << endl;
 
             #include "bedload.H"
         }
+        Info << "after bed.exist" << endl;
 
         if (switchSuspension=="on")
         {

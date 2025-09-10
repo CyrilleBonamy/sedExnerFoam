@@ -18,7 +18,7 @@ FoamFile
 
 sedimentBed             on;  // on or off
 
-bedMotion               on;
+bedMotion               off;
 
 sedimentBedPatches     (bed);
 

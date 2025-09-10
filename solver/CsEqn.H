@@ -40,6 +40,7 @@ else if (CsDiffusivity=="effective")
 }
 
 
+Info << "PART0" << endl;
 if (bed.exist())
 {
     // reference to faMesh
@@ -80,6 +81,7 @@ if (bed.exist())
         // reference level
         scalar zbRef = 2.5 * dS.value();
 
+Info << "PART1" << endl;
         forAll(bedPatch, facei)
         {
             // label of neighbour cell
@@ -144,7 +146,7 @@ if (bed.exist())
         }
     }
 }
-
+Info << "PART2" << endl;
 // MULES FORMULATION FOR SUSPENTION TRANSPORT
 if (switchMULES=="on")
 {

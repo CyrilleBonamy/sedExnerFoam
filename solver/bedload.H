@@ -78,9 +78,11 @@ if (Tsat)
     label Nf = meshProj.nFaces();  // number of faces
     Info << "n faces = " << Nf << endl;
 
-    scalarSquareMatrix Amat(meshProj.nFaces());
-    Amat = Zero;
-
+    scalarField qsx(Nf);
+    scalarSquareMatrix Amat(Nf, Zero);
+    scalarSquareMatrix Amatinv(Nf, Zero);
+    if (Nf!=0)
+{
     scalar dl = 0;
     for (label edgei = 0; edgei < meshProj.nInternalEdges(); edgei++)
     {
@@ -94,7 +96,6 @@ if (Tsat)
     Info << "dl = " << dl << endl;
     scalar Mcoef = Lsat->value() / (2*dl);
     Info << "Mcoef = " << Mcoef << endl;
-    scalarField qsx(Nf);
 
     for (label i=1; i<Nf-1; i++)
     {
@@ -110,8 +111,12 @@ if (Tsat)
     qsx[0] = qsat[0].x();
     qsx[Nf-1] = qsat[Nf-1].x();
 
+    }
+
     LUscalarMatrix LU(Amat);
-    scalarField qbx(LU.solve(qsx));
+    //scalarField qbx(LU.solve(qsx));
+    LU.inv(Amatinv);
+    scalarField qbx(Amatinv*qsx);
 
     forAll(meshProj.S(), facei)
     {

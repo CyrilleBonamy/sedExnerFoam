@@ -22,7 +22,7 @@ vectorCodedSource
     selectionMode   all;
     redirectType    velocitySource;
     fields          (U);
-    name            B;
+    //name            Bbbbb;
     codeOptions
     #{
         #include "fvCFD.H"

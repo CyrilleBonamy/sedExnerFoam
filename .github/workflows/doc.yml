@@ -15,6 +15,7 @@ jobs:
     steps:
       - name: install docs package
         run: |
+          sudo rm -rf /var/lib/apt/lists/* &&
           sudo apt-get update && sudo apt-get -y install ca-certificates git python3-pip libclang-14-dev &&
             sudo apt-get -y install ack-grep libclang-cpp14 wget graphviz tex-gyre texlive-base dvisvgm &&
             sudo DEBIAN_FRONTEND=noninteractive TZ='Europe/Paris' apt-get -y install texlive-latex-extra texlive-fonts-extra texlive-fonts-recommended python3-venv &&

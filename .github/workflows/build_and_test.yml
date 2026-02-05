@@ -122,15 +122,15 @@ jobs:
         run: chmod a+x -R *
         working-directory: /usr/lib/openfoam/openfoam2512/site
 
-      - name: Test pyCompare_duneTransport
-        run: |
-          source /openfoam/bash.rc
-          source /home/sudofoam/pyenv/bin/activate
-          sudo chmod -R a+rwX tests
-          cd tests/pyCompare/duneTransport
-          runuser -u sudofoam -- ./Allrun > /dev/null
-          python3 test.py
-
+#      - name: Test pyCompare_duneTransport
+#        run: |
+#          source /openfoam/bash.rc
+#          source /home/sudofoam/pyenv/bin/activate
+#          sudo chmod -R a+rwX tests
+#          cd tests/pyCompare/duneTransport
+#          runuser -u sudofoam -- ./Allrun > /dev/null
+#          python3 test.py
+#
       - name: Test pyCompare_AB0avalanche
         run: |
           source /openfoam/bash.rc

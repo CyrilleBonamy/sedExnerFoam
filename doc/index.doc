@@ -7,8 +7,8 @@
 /*! 
 \mainpage 
 <!--sedFOAM Manual-->
-@image html "cylinder3d.png" width=800px
-@image latex "cylinder3d.png"
+@image html "sedexnerfoam_background.png" width=800px
+@image latex "sedexnerfoam_background.png"
 <h2>Introduction</h2>
 This documentation describes the three-dimensional two-phase flow solver for sediment transport applications:  SedFoam. The solver is based on twoPhaseEulerFoam solver available in the official release of the open-source CFD software OpenFOAM (based on OF2.4). In this approach the sediment phase is modeled as a continuum, and constitutive laws have to be prescribed for the sediment stresses. In the proposed solver, two different inter-granular stress models are implemented: the kinetic theory of granular flows and the dense granular flow rheology \f$\mu (I)\f$. For the fluid stress, laminar or turbulent flow regimes can be simulated and three different turbulence models are available for sediment transport: a simple mixing length model (one-dimensional configuration only), a \f$\kappa\f$-\f$\varepsilon\f$ and a \f$\kappa\f$-\f$\omega\f$ model. 
 
@@ -28,18 +28,18 @@ If you are using a sedFoam version without modification, you should also refer t
 The documentation is divided into two parts, the first one is the user manual:
 <ul>
 <li>Section \ref install explains how to download, compile and install SedFoam.
-<li>Section \ref howtodocker provides a survival guide on how to use SedFoam docker.
-<li>Section \ref governingEq describes sedFoam governing equations. 
-<li>Section \ref algoSedFoam describes sedFoam algorithm. 
-<li>Section \ref tutorials_laminar describes the laminar flow tutorials provided with SedFoam sources including postprocessing using a python toolbox also provided with the source and the expected results.
-<li>Section \ref tutorials_RAS describes turbulent flow tutorials using RAS models provided with SedFoam sources.
-<li>Section \ref tutorials_LES describes turbulent flow tutorials using LES models provided with SedFoam sources.
-<li>Section \ref ndsolution describes how to obtain a non-dimensional solution using SedFoam.
-<li>Section \ref tutorials_DyM describes dynamic mesh tutorials using SedFoam. 
-<li>Section \ref publicationList contains the list of publications using SedFoam.
-<li>Section \ref inputs describes the input parameters for SedFoam.
-<li>Section \ref howtogit provides a survival guide on how to use git to use/develop sedFoam.
-<li>Section \ref faq provides answers to typical Frequently Asked Questions about SedFoam 
+#<li>Section \ref howtodocker provides a survival guide on how to use SedFoam docker.
+#<li>Section \ref governingEq describes sedFoam governing equations. 
+#<li>Section \ref algoSedFoam describes sedFoam algorithm. 
+#<li>Section \ref tutorials_laminar describes the laminar flow tutorials provided with SedFoam sources including postprocessing using a python toolbox also provided with the source and the expected results.
+#<li>Section \ref tutorials_RAS describes turbulent flow tutorials using RAS models provided with SedFoam sources.
+#<li>Section \ref tutorials_LES describes turbulent flow tutorials using LES models provided with SedFoam sources.
+#<li>Section \ref ndsolution describes how to obtain a non-dimensional solution using SedFoam.
+#<li>Section \ref tutorials_DyM describes dynamic mesh tutorials using SedFoam. 
+#<li>Section \ref publicationList contains the list of publications using SedFoam.
+#<li>Section \ref inputs describes the input parameters for SedFoam.
+#<li>Section \ref howtogit provides a survival guide on how to use git to use/develop sedFoam.
+#<li>Section \ref faq provides answers to typical Frequently Asked Questions about SedFoam 
 </ul>
 
 
@@ -50,7 +50,7 @@ The second part provides informations for developers.
 Copyright &copy; 2021 by
 <a href="mailto:cyrille.bonamy@univ-grenoble-alpes.fr">Cyrille Bonamy</a>,
 <a href="mailto:julien.chauchat@univ-grenoble-alpes.fr">Julien Chauchat</a>,
-<a href="https://sites.udel.edu/thsu/group-members">Tian-Jian Hsu</a>,
+<a href="mailto:matthias.renaud@univ-grenoble-alpes.fr">Matthias Renaud</a>,
 and <a href="credits-contributors.html">contributors.</a><p>
 
 Permission to use, copy, modify, and distribute this software and its

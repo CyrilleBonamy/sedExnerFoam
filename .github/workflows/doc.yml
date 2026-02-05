@@ -29,12 +29,12 @@ jobs:
       - name: Install doxygen
         run: |
           shopt -s expand_aliases &&
-          wget https://sourceforge.net/projects/doxygen/files/rel-1.9.7/doxygen-1.9.7.linux.bin.tar.gz &&
-          tar -xvf doxygen-1.9.7.linux.bin.tar.gz 
+          wget https://sourceforge.net/projects/doxygen/files/rel-1.9.3/doxygen-1.9.3.linux.bin.tar.gz &&
+          tar -xvf doxygen-1.9.3.linux.bin.tar.gz 
       - name: clone m.css and build doc
         run: |
           shopt -s expand_aliases && export MYPATH=$PWD &&
-          export PATH=$PWD/doxygen-1.9.7/bin:$PATH &&
+          export PATH=$PWD/doxygen-1.9.3/bin:$PATH &&
           cd sedExnerFoam/doc &&
           git clone https://github.com/mosra/m.css &&
           cd m.css/documentation && cp ../../doxygen.py . &&

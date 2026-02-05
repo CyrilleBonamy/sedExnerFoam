@@ -32,15 +32,15 @@ Group
 Description
     Scalar transport and incompressible turbulent flow solver.
 
-    \heading Solver details
-    The equation is given by:
+//    \heading Solver details
+//    The equation is given by:
+//
+//    \f[
+//        \ddt{T} + \div \left(\vec{U} T\right) - \div \left(D_T \grad T \right)
+//        = S_{T}
+//    \f]
 
-    \f[
-        \ddt{T} + \div \left(\vec{U} T\right) - \div \left(D_T \grad T \right)
-        = S_{T}
-    \f]
-
-    Where:
+//    Where:
     \vartable
         Cs         | Volumic fraction
         \vec{U}    | Velocity

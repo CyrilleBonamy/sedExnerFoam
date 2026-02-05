@@ -856,7 +856,15 @@ WARN_LOGFILE           =
 
 INPUT                  = index.doc \
                          install.doc \
-#                         governingEq.doc \
+                         governingEq.doc \
+                         credits.doc \
+                         tutorials_laminar.doc \
+                         input.doc \
+                         howtogit.doc \
+                         howtodocker.doc \
+                         faq.doc \
+                         ../solver \
+                         ../src
 #                         algorithm.doc \
 #                         tutorials_laminar.doc \
 #                         tutorials_RAS.doc \
@@ -864,13 +872,6 @@ INPUT                  = index.doc \
 #                         ndsolution.doc \
 #                         tutorials_DyM.doc \
 #                         publications.doc \
-#                         input.doc \
-#                         howtogit.doc \
-#                         howtodocker.doc \
-#                         faq.doc \
-                         credits.doc \
-                         ../solver \
-                         ../src
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

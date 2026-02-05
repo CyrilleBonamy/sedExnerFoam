@@ -47,7 +47,7 @@ jobs:
           name: sedExnerFoam-binary
           path: /usr/lib/openfoam/openfoam2512/site
       - name: chmod sedExnerFoam binary
-        run: chmod a+x -R *
+        run: chmod a+x -R . 
         working-directory: /usr/lib/openfoam/openfoam2512/site
 
       - name: Test 1DSedim
@@ -119,7 +119,7 @@ jobs:
           name: sedExnerFoam-binary
           path: /usr/lib/openfoam/openfoam2512/site
       - name: chmod sedExnerFoam binary
-        run: chmod a+x -R *
+        run: chmod a+x -R .
         working-directory: /usr/lib/openfoam/openfoam2512/site
 
 #      - name: Test pyCompare_duneTransport

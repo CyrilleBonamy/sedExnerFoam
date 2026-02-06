@@ -22,13 +22,13 @@ jobs:
       - name: Build sedExnerFoam
         run: |
           shopt -s expand_aliases && source /openfoam/bash.rc &&
-          export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && ./Allwmake -prefix=group
+          ./Allwmake
 
   docker:
     runs-on: ${{ matrix.os }}  
     env:
       REGISTRY_IMAGE: cbonamy/sedexnerfoam_2512_ubuntu
-    #needs: build
+    needs: build
     strategy:
       fail-fast: false
       matrix:

@@ -27,7 +27,7 @@ jobs:
   docker:
     runs-on: ${{ matrix.os }}  
     env:
-      REGISTRY_IMAGE: cbonamy/sedExnerFoam_2512_ubuntu
+      REGISTRY_IMAGE: cbonamy/sedexnerfoam_2512_ubuntu
     #needs: build
     strategy:
       fail-fast: false
@@ -91,7 +91,7 @@ jobs:
   merge:
     runs-on: ubuntu-24.04
     env:
-      REGISTRY_IMAGE: cbonamy/sedExnerFoam_2512_ubuntu
+      REGISTRY_IMAGE: cbonamy/sedexnerfoam_2512_ubuntu
     needs:
       - docker
     steps:
@@ -138,7 +138,7 @@ jobs:
           - platform: linux/arm64
             os: ubuntu-24.04-arm
     env:
-      REGISTRY_IMAGE: cbonamy/sedExnerFoam_2512_notebook
+      REGISTRY_IMAGE: cbonamy/sedexnerfoam_2512_notebook
     needs: merge
     steps:
       - name: Checkout repository
@@ -192,7 +192,7 @@ jobs:
   merge-nb:
     runs-on: ubuntu-24.04
     env:
-      REGISTRY_IMAGE: cbonamy/sedExnerFoam_2512_notebook
+      REGISTRY_IMAGE: cbonamy/sedexnerfoam_2512_notebook
     needs:
       - docker-nb
     steps:

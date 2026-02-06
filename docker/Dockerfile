@@ -4,7 +4,7 @@ ARG WM_NCOMPPROCS=10
 ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /root/
-RUN git clone --branch develop --recurse-submodules https://github.com/sedfoam/sedexnerfoam.git --depth 1
+RUN git clone --recurse-submodules https://github.com/sedfoam/sedexnerfoam.git --depth 1
 
 WORKDIR /root/sedexnerfoam
 RUN /bin/bash -c 'shopt -s expand_aliases && source /openfoam/bash.rc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && ./Allwmake -prefix=group'

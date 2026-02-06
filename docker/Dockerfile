@@ -3,6 +3,8 @@ LABEL maintainer="cyrille.bonamy@univ-grenoble-alpes.fr"
 ARG WM_NCOMPPROCS=10
 ARG DEBIAN_FRONTEND=noninteractive
 
+USER root
+
 WORKDIR /root/
 RUN git clone --recurse-submodules https://github.com/sedfoam/sedexnerfoam.git --depth 1
 

@@ -17,7 +17,7 @@ A number of one-dimensional test cases are provided with reference solutions, an
 
 \section  Sedim_testcase 1DSedim: Pure sedimentation
 
-This tutorial will describe how to pre-process, run and post-process a case corresponding to a pure sedimentation problem in a one-dimensional configuration using the two-phase flow equations. The geometry is shown in Figure 1 in which bottom boundary is a wall and the top boundary is an open boundary.  Initially, the flow is at rest and will be solved on a uniform mesh using the sedExnerFoam solver for laminar, isothermal, incompressible two-phase flow. The numerical results are compared with experiments to validate the model in terms of settling curves, time evolution of concentration interface, and concentration profiles.
+This tutorial will describe how to pre-process, run and post-process a case corresponding to a pure sedimentation problem in a one-dimensional configuration using the two-phase flow equations. The geometry is shown in Figure 1 in which bottom boundary is a wall and the top boundary is an open boundary.  Initially, the flow is at rest and will be solved on a uniform mesh using the sedExnerFoam solver for laminar, isothermal, incompressible flow. The numerical results are compared with experiments to validate the model in terms of settling curves, time evolution of concentration interface, and concentration profiles.
 
 
 \subsection preproc Pre-processing
@@ -28,7 +28,7 @@ Like in OpenFOAM, cases are setup by editing case files using a text editor such
 
 OpenFOAM always operates in a 3 dimensional Cartesian coordinate system and all geometries are generated in 3 dimensions. OpenFOAM solves the case in 3 dimensions by default but can be instructed to solve in 2 dimensions by specifying a ‘special’ empty boundary condition on boundaries normal to the (3rd) dimension for which no solution is required. In 2 dimensions, the directions x and y are always chosen even if the mesh is given in the x-z plane.
 
-The sedimentation domain consists of a rectangle of side length L = 0.006 m in the x–y plane and of height h=0.06 m in the vertical direction z. The side length is chosen to ensure a unity cell aspect ratio. A uniform mesh of 1 by 1 by 100 cells will be used. The block structure is shown in Figure 1.
+The sedimentation domain consists of a rectangle of side length L = 0.006 m in the x–y plane and of height h=0.06 m in the vertical direction z. The side length is chosen to ensure a unity cell aspect ratio. A uniform mesh of 1 by 1 by 300 cells will be used. The block structure is shown in Figure 1.
 
 The mesh generator supplied with OpenFOAM, blockMesh, generates meshes from a description specified in an input dictionary, blockMeshDict located in the *constant/polyMesh* directory for a given case. The *blockMeshDict* entries for this case are as follows:
 
@@ -66,7 +66,7 @@ vertices
 
 blocks
 (
-    hex (0 1 5 4 3 2 6 7) (1 1 200) simpleGrading (1 1 1)
+    hex (0 1 5 4 3 2 6 7) (1 1 300) simpleGrading (1 1 1)
 );
 
 edges
@@ -133,7 +133,7 @@ The running status of blockMesh is reported in the terminal window. Any mistakes
 
 \paragraph BC_init Boundary and initial conditions
 
-Once the mesh generation is complete, the user can look at this initial fields set up for this case. The case is set up to start at time t = 0 s, so the initial field data is stored in a 0_org sub-directory of the 1DSedim directory. The 0_org sub-directory contains several files: alpha.a, U.a, U.b, p_rbgh, muI, pa, Theta, one for each of the solid phase volume fraction (alpha.a), velocities of solid and fluid phases (U.a and U.b), the reduced pressure (p_rbgh) fields whose initial values and boundary conditions must be set. Let us examine file U.a:
+Once the mesh generation is complete, the user can look at this initial fields set up for this case. The case is set up to start at time t = 0 s, so the initial field data is stored in a 0_org sub-directory of the 1DSedim directory. The 0_org sub-directory contains several files: Cs the concentration, U the velocity, p the pressure and Ws the settling velocity  whose initial values and boundary conditions must be set. Let us examine file U:
 
 \verbatim
 dimensions      [0 1 -1 0 0 0 0];
@@ -152,7 +152,8 @@ boundaryField
     }
     top
     {
-        type            zeroGradient;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
     bottom
     {
@@ -179,116 +180,61 @@ There are 3 principal entries in field data files:
 -boundaryField:
     the boundary field data that includes boundary conditions and data for all the boundary patches.
 
-For this case,  boundary conditions consist of cyclic boundaries at the inlet and outlet (left and right boundaries) and walls at the top and bottom boundaries, the top boundary is zeroGradient whereas the bottom boundary is a no-slip boundary conditions i.e zero velocity at the wall. The frontAndBack patch represents the front and back planes of the 2D case and therefore must be set as empty.
-
-The user can, similarly, examine the fluid phase velocity field in the 0_org/U.b file. The solid phase volume fraction has zeroGradient boundary conditions at the top and bottom boundaries whereas the pressure has fixedValue at the top boundary (equivalent to setting the atmospheric pressure) and a fixedFluxPressure at the bottom boundary. We shall explain below what this boundary condition means.
+The solid volume fraction has 0 fixedValue boundary condition at the top boundary condition and zeroGradient at the bottom. The pressure has a slip boundary condition at the top boundary and a zeroGradient at the bottom boundary.
 
 \paragraph PhysProp Physical properties
 
-The physical properties for the case are stored in dictionaries whose names are given the suffix …Properties, located in the Dictionaries directory tree. For a sedExnerFoam case, there are 8 property files: transportProperties, interfacialProperties, ppProperties, granularRheologyProperties, kineticTheoryProperties, RASProperties  twophaseRASProperties
+The physical properties for the case are stored in dictionaries whose names are given the suffix …Properties, located in the Dictionaries directory tree. For a sedExnerFoam case, there are 4 property files: transportProperties, bedloadProperties, suspensionProperties, turbulenceProperties
 
 In the transport property file, the physical properties of the solid and fluid phases are set, such as density, kinematic viscosity and particle diameter.
 
 \verbatim
 // * * * * * * * * * * * * sediment properties * * * * * * * * * * * * //
-phasea
-{
-    rho             rho [ 1 -3 0 0 0 ] 1050;
-    nu              nu [ 0 2 -1 0 0 ] 1e-6;
-    d               d [ 0 1 0 0 0 0 0 ] 290e-6;
-    hExp            hExp [ 0 0  0 0 0 0 0 ] 3.15;  // hindrance exponent for drag: beta^(-hExp) (2.65 by default)
-}
-// * * * * * * * * * * * * fluid properties * * * * * * * * * * * * //
-phaseb
-{
-    rho             rho [ 1 -3 0 0 0 ] 950;
-    nu              nu [ 0 2 -1 0 0 ] 2.105e-05;
-    d               d [ 0 1 0 0 0 0 0 ] 290e-6;
-}
-//*********************************************************************** //
+
+rhoS    [1 -3 0 0 0 0 0] 1050; // sediment density
+
+dS      [0 1 0 0 0 0 0] 2.9e-4; // sediment diameter
+
+CsMax    [0 0 0 0 0 0 0] 0.6; // max volumic sediment concentration
+
+// ************************************************************************* //
+
 transportModel  Newtonian;
 
-nu              nu [ 0 2 -1 0 0 0 0 ] 2.105e-05;
+nu      nu [ 0 2 -1 0 0 0 0 ] 2.105e-05;
 
-nuMax           nuMax [0 2 -1 0 0 0 0] 1e0;      // viscosity limiter for the Frictional model (required for stability)
-
-alphaSmall      alphaSmall [ 0 0 0 0 0 0 0 ] 1e-6;  // minimum volume fraction (phase a) for division by alpha
+Sc      1; // Schmidt number
 
 \endverbatim
 
-The hindrance function exponent of the Richardson-Zaki law can be tuned using the parameter hExp. This is important for this first test case which is in the laminar regime for the drag. The transportModel has to be prescribed when using turbulence model, it is present here for compatibility with the other test cases. The nuMax value is a viscosity limiter for the all the viscosities, it allows the user to control the numerical stability of the solver and will be discussed in the second test case. It is especially important as some shear stress terms are discretized explicitly and the frictional viscosity can reach huge values. The alphaSmall value is used to regularise the division by alpha.a in the source code, the default value is set to \f$ 10^{-6} \f$.
-
-The dictionary *interfacialProperties* allows to specify the drag model:
+The dictionary *bedloadProperties* allows to activate or not the moving bed model:
 
 \verbatim
-dragModela      GidaspowSchillerNaumann;
-
-dragModelb      GidaspowSchillerNaumann;
-
-dragPhase       a;
+sedimentBed       off;
 \endverbatim
 
-The model chosen here is GidaspowSchilerNaumann that corresponds to the drag force around a spherical particle corrected by a hindrance function (\f$ \beta^{-hExp}\f$).
+In the present case (1DSedim), it is desactivated.
 
-The dictionary *ppProperties* contains the information concerning the permanent contact contribution to the solid phase pressure. In sedExnerFoam, the model of Johnson and Jackson (1987) is used:
-
-\f$ p_{ff} = Fr \frac{\left( \alpha - \alpha_{min}^{Friction} \right)^{\eta}}{\left(\alpha_{Max} - \alpha \right)^p} \f$
+The dictionary *suspensionProperties* contains the parameters of the suspension model.
 
 \verbatim
-ppModel          JohnsonJackson;
 
-alphaMax         alphaMax [ 0 0 0 0 0 0 0 ] 0.635;
+suspension        on;
 
-alphaMinFriction alphaMinFriction [ 0 0 0 0 0 0 0 ] 0.57;
+MULESformulation  on;
 
-Fr               Fr [ 1 -1 -2 0 0 0 0 ] 5e-2;
+fallModel
+{
+	type   Stokes;
+}
 
-eta0             eta0 [ 0 0 0 0 0 0 0 ] 3;
-
-eta1             eta1 [ 0 0 0 0 0 0 0 ] 5;
-
-packingLimiter  no;
-
-\endverbatim
-
-And the dictionary *granularRheologyProperties* controls the granular rheology part:
-
-\verbatim
-granularRheology   on;
-
-granularDilatancy  off;
-
-granularCohesion off;
-
-alphaMaxG       alphaMaxG [ 0 0 0 0 0 0 0 ] 0.6;
-
-mus             mus  [ 0 0 0 0 0 0 0 ] 0.24;
-
-mu2             mu2  [ 0 0 0 0 0 0 0 ] 0.39;
-
-I0              I0  [ 0 0 0 0 0 0 0 ] 0.01;
-
-Bphi            Bphi [ 0 0 0 0 0 0 0 ] 1.;
-
-n               n [ 0 0 0 0 0 0 0 ] 1.;
-
-Dsmall          Dsmall [ 0 0 -1 0 0 0 0 ] 1e-4;
-
-relaxPa         relaxPa [ 0 0 0 0 0 0 0 ] 1;
-
-FrictionModel   Coulomb;
-
-PPressureModel  none;
-
-FluidViscosityModel Einstein;
+hindranceModel
+{
+	type   ZakiModified;
+	n      3.45;
+}
 
 \endverbatim
-
-On the first line the switch granularRheology allows to turn on and off this module. The keywords FrictionModel, PPressureModel and FluidViscosityModel allow to choose the friction model, the shear induced particle pressure model and the effective viscosity model (see \ref inputs for details).
-
-For the present case the granularRheology is set to Coulomb and the FluidViscosityModel is used for the effective viscosity model and an Einstein model is used. All the details concerning the different models can be found in the Geophysical Model Development paper on sedExnerFoam.
-
-The remaining dictionaries are not used for this tutorial and will not be detailed here. Their content will be explained in the next tutorials when they are used.
 
 \paragraph control_sedExnerFoam Control
 
@@ -296,7 +242,7 @@ Input data related to the control of time and reading and writing of the solutio
 
 The start/stop times and the time step for the run must be set. In this tutorial we wish to start the run at time t = 0 which means that OpenFOAM needs to read field data from a directory named 0. Therefore we set the startFrom keyword to startTime and then specify the startTime keyword to be 0.
 
-As the simulation progresses we wish to write results at certain intervals of time that we can later view with a post-processing package. The writeControl keyword presents several options for setting the time at which the results are written; here we select the adjustableRunTime option which specifies that results are written every writeInterval seconds of simulated time, adjusting the time steps to coincide with the writeInterval if necessary and the time step is automatically adjusted using adjustTimeStep = on. The time step controlled using different criteria on Courant numbers based on the maximum velocity, the relative velocity (\f$ U_r=U_b-U_a \f$) and the interfacial Courant number. The maximum values of the Courant numbers (maxCo and maxAlphaCo) are set in the controlDict and the maximum value of the time step is controlled by the parameter maxDeltaT.
+As the simulation progresses we wish to write results at certain intervals of time that we can later view with a post-processing package. The writeControl keyword presents several options for setting the time at which the results are written; here we select the adjustableRunTime option which specifies that results are written every writeInterval seconds of simulated time, adjusting the time steps to coincide with the writeInterval if necessary and the time step is adjusted using deltaT value.
 
 OpenFOAM creates a new directory named after the current time, e.g. 20 s, on each occasion that it writes a set of data. For this case, the entries in the controlDict are shown below:
 
@@ -329,7 +275,7 @@ timePrecision   6;
 
 runTimeModifiable on;
 
-adjustTimeStep  on;
+adjustTimeStep  off;
 
 maxCo           0.3;
 
@@ -344,138 +290,8 @@ maxDeltaT       2e-1;
 
 The numerical schemes and linear solvers are set in the *system/fvSchemes* and *system/fvSolution* files respectively.
 
-Concerning the numerical schemes, the time discretisation is an Euler implicit scheme, the divergence terms are of Gauss limitedLinear type (2nd order centered schemes with a Sweby limiter) and the laplacian scheme is Gauss linear corrected for all terms. The *fvScheme* file is shown below:
+Concerning the numerical schemes, the time discretisation is an Euler implicit scheme, the divergence terms are of Gauss limitedLinear type (2nd order centered schemes with a Sweby limiter) and the laplacian scheme is Gauss linear corrected for all terms.
 
-\verbatim
-
-ddtSchemes
-{
-    default         Euler implicit;
-}
-
-gradSchemes
-{
-        default         Gauss linear;
-}
-
-divSchemes
-{
-    default         none;
-// alphaEqn
-    div(phi,alpha)  Gauss upwind;//limitedLinear01 1;
-    div(phir,alpha) Gauss upwind;//limitedLinear01 1;
-// UEqn
-    div(phi.a,U.a)    Gauss limitedLinearV 1;
-    div(phi.b,U.b)    Gauss limitedLinearV 1;
-    div(phiRa,Ua)   Gauss limitedLinear 1;
-    div(phiRb,Ub)   Gauss limitedLinear 1;
-// pEqn
-    div(alpha,nu)   Gauss linear;
-// alphaPlastic
-    div(phia,alphaPlastic)   Gauss limitedLinear01 1;
-// pa
-    div(phia,pa_new_value)   Gauss limitedLinear 1;
-}
-
-laplacianSchemes
-{
-    default         none;
-// UEqn
-    laplacian(nuEffa,U.a) Gauss linear corrected;
-    laplacian(nuEffb,U.b) Gauss linear corrected;
-    laplacian(nuFra,U.a)  Gauss linear corrected;
-// pEqn
-    laplacian((rho*(1|A(U))),p_rbgh) Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default  linear;
-}
-
-snGradSchemes
-{
-    default         corrected;
-}
-
-fluxRequired
-{
-    default         no;
-    p_rbgh               ;
-}
-
-\endverbatim
-
-In the *system/fvSolution* file, the user can specify the linear solver he/she wants to use for each equation and the tolerance for the resolution. The user can also control the number of corrector steps and non-orthogonal correctors (useless for cartesian grids) for the PIMPLE algorithm. In the present case, a single PIMPLE corrector is enough the residual of the pressure equation is shown to converge well. The *fvSolution* file is reproduced below:
-
-\verbatim
-
-solvers
-{
-    p_rbgh
-    {
-        solver          GAMG;
-        tolerance       1e-9;
-        relTol          0.0001;
-        smoother        DIC;
-        nPreSweeps      0;
-        nPostSweeps     2;
-        nFinestSweeps   2;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
-    }
-
-    p_rbghFinal
-    {
-        $p_rbgh;
-        tolerance       1e-9;
-        relTol          0;
-    }
-    "(alpha.a|U.a|U.b|pa_new_value|alphaPlastic)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-9;
-        relTol          0;
-    }
-    "(alpha.aFinal|U.aFinal|U.bFinal|paFinal|alphaPlasticFinal)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-9;
-        relTol          0;
-    }
-}
-
-PIMPLE
-{
-    momentumPredictor 0;
-    nOuterCorrectors  1;
-    nCorrectors     1;
-    nNonOrthogonalCorrectors 0;
-    correctAlpha    0;
-    nAlphaCorr      1;
-    pRefCell        0;
-    pRefValue       0;
-}
-
-
-relaxationFactors
-{
-    fields
-    {
-        p_rbgh               1.;
-        p_rbghFinal          1;
-    }
-    equations
-    {
-        "U.a|U.b"             1.;
-        "(U.a|U.b)Final"      1;
-    }
-
-}
-\endverbatim
+In the *system/fvSolution* file, the user can specify the linear solver he/she wants to use for each equation and the tolerance for the resolution. The user can also control the number of corrector steps and non-orthogonal correctors (useless for cartesian grids) for the PIMPLE algorithm. In the present case, a single PIMPLE corrector is enough the residual of the pressure equation is shown to converge well.
 
 */

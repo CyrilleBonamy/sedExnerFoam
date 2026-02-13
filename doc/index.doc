@@ -6,7 +6,7 @@
  */
 /*! 
 \mainpage 
-<!--sedFOAM Manual-->
+<!--sedExnerFoam Manual-->
 @image html "sedexnerfoam_background.png" width=800px
 @image latex "sedexnerfoam_background.png"
 <h2>Introduction</h2>
@@ -28,7 +28,7 @@ The documentation is divided into two parts, the first one is the user manual:
 <li>Section \ref howtodocker provides a survival guide on how to use SedExnerFoam docker (in progress).
 <li>Section \ref governingEq describes sedExnerFoam governing equations (in progress). 
 <li>Section \ref tutorials_laminar describes the laminar flow tutorials provided with sedExnerFoam sources including postprocessing using a python toolbox also provided with the source and the expected results.
-<li>Section \ref inputs describes the input parameters for SedFoam.
+<li>Section \ref inputs describes the input parameters for sedExnerFoam.
 <li>Section \ref howtogit provides a survival guide on how to use git to use/develop sedExnerFoam.
 <li>Section \ref faq provides answers to typical Frequently Asked Questions about sedExnerFoam 
 </ul>

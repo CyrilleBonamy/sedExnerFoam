@@ -6,23 +6,23 @@
  */
 /*! \page tutorials_laminar Laminar flow tutorials
 
-In this chapter we shall describe in detail the process of setup, simulation and post-processing for SedFoam test cases in the laminar flow regime.
-All the tutorial cases are in the *tutorials/laminar* directory. The text herein is highly inspired from the OpenFOAM user-guide for the cavity tutorial available at http://cfd.direct/openfoam/user-guide/cavity/ but is adapted to the specificity of SedFoam.
+In this chapter we shall describe in detail the process of setup, simulation and post-processing for sedExnerFoam test cases in the laminar flow regime.
+All the tutorial cases are in the *tutorials/laminar* directory. The text herein is highly inspired from the OpenFOAM user-guide for the cavity tutorial available at http://cfd.direct/openfoam/user-guide/cavity/ but is adapted to the specificity of sedExnerFoam.
 
-The test cases provided with SedFoam are aimed to facilitate the learning as well as the development of new configurations. If you develop new feature do not hesitate to share your development with us so that we can incorporate them in the github repository and others will benefit from your work the way you benefited from the original SedFoam version!
+The test cases provided with sedExnerFoam are aimed to facilitate the learning as well as the development of new configurations. If you develop new feature do not hesitate to share your development with us so that we can incorporate them in the github repository and others will benefit from your work the way you benefited from the original sedExnerFoam version!
 
 \tableofcontents{xml:1}
 
-A number of one-dimensional test cases are provided with reference solutions, analytical, experimental or numerical, to validate SedFoam implementation and developments. Most of these test cases are used in the contiunous integration procedure to verify new developments in SedFoam.
+A number of one-dimensional test cases are provided with reference solutions, analytical, experimental or numerical, to validate sedExnerFoam implementation and developments. Most of these test cases are used in the contiunous integration procedure to verify new developments in sedExnerFoam.
 
 \section  Sedim_testcase 1DSedim: Pure sedimentation
 
-This tutorial will describe how to pre-process, run and post-process a case corresponding to a pure sedimentation problem in a one-dimensional configuration using the two-phase flow equations. The geometry is shown in Figure 1 in which bottom boundary is a wall and the top boundary is an open boundary.  Initially, the flow is at rest and will be solved on a uniform mesh using the SedFoam solver for laminar, isothermal, incompressible two-phase flow. The numerical results are compared with experiments to validate the model in terms of settling curves, time evolution of concentration interface, and concentration profiles.
+This tutorial will describe how to pre-process, run and post-process a case corresponding to a pure sedimentation problem in a one-dimensional configuration using the two-phase flow equations. The geometry is shown in Figure 1 in which bottom boundary is a wall and the top boundary is an open boundary.  Initially, the flow is at rest and will be solved on a uniform mesh using the sedExnerFoam solver for laminar, isothermal, incompressible two-phase flow. The numerical results are compared with experiments to validate the model in terms of settling curves, time evolution of concentration interface, and concentration profiles.
 
 
 \subsection preproc Pre-processing
 
-Like in OpenFOAM, cases are setup by editing case files using a text editor such as atome, vscode/vscodium, emacs, vi, gedit, nedit, etc. The I/O uses a dictionary format with keywords. A case involves data for mesh, fields, properties, control parameters, etc  that are stored in a set of files within a case directory rather than in a single case file. The case directory is given a suitably descriptive name. This tutorial consists of a set of cases located in the SedFoam distribution under the folder *sedFoamDirectory/turheolotorials/laminar/1DSedim*.
+Like in OpenFOAM, cases are setup by editing case files using a text editor such as atome, vscode/vscodium, emacs, vi, gedit, nedit, etc. The I/O uses a dictionary format with keywords. A case involves data for mesh, fields, properties, control parameters, etc  that are stored in a set of files within a case directory rather than in a single case file. The case directory is given a suitably descriptive name. This tutorial consists of a set of cases located in the sedExnerFoam distribution under the folder *sedExnerFoamDirectory/turheolotorials/laminar/1DSedim*.
 
 \paragraph meshgen Mesh generation
 
@@ -185,7 +185,7 @@ The user can, similarly, examine the fluid phase velocity field in the 0_org/U.b
 
 \paragraph PhysProp Physical properties
 
-The physical properties for the case are stored in dictionaries whose names are given the suffix …Properties, located in the Dictionaries directory tree. For a SedFoam case, there are 8 property files: transportProperties, interfacialProperties, ppProperties, granularRheologyProperties, kineticTheoryProperties, RASProperties  twophaseRASProperties
+The physical properties for the case are stored in dictionaries whose names are given the suffix …Properties, located in the Dictionaries directory tree. For a sedExnerFoam case, there are 8 property files: transportProperties, interfacialProperties, ppProperties, granularRheologyProperties, kineticTheoryProperties, RASProperties  twophaseRASProperties
 
 In the transport property file, the physical properties of the solid and fluid phases are set, such as density, kinematic viscosity and particle diameter.
 
@@ -230,7 +230,7 @@ dragPhase       a;
 
 The model chosen here is GidaspowSchilerNaumann that corresponds to the drag force around a spherical particle corrected by a hindrance function (\f$ \beta^{-hExp}\f$).
 
-The dictionary *ppProperties* contains the information concerning the permanent contact contribution to the solid phase pressure. In SedFoam, the model of Johnson and Jackson (1987) is used:
+The dictionary *ppProperties* contains the information concerning the permanent contact contribution to the solid phase pressure. In sedExnerFoam, the model of Johnson and Jackson (1987) is used:
 
 \f$ p_{ff} = Fr \frac{\left( \alpha - \alpha_{min}^{Friction} \right)^{\eta}}{\left(\alpha_{Max} - \alpha \right)^p} \f$
 
@@ -286,11 +286,11 @@ FluidViscosityModel Einstein;
 
 On the first line the switch granularRheology allows to turn on and off this module. The keywords FrictionModel, PPressureModel and FluidViscosityModel allow to choose the friction model, the shear induced particle pressure model and the effective viscosity model (see \ref inputs for details).
 
-For the present case the granularRheology is set to Coulomb and the FluidViscosityModel is used for the effective viscosity model and an Einstein model is used. All the details concerning the different models can be found in the Geophysical Model Development paper on SedFoam.
+For the present case the granularRheology is set to Coulomb and the FluidViscosityModel is used for the effective viscosity model and an Einstein model is used. All the details concerning the different models can be found in the Geophysical Model Development paper on sedExnerFoam.
 
 The remaining dictionaries are not used for this tutorial and will not be detailed here. Their content will be explained in the next tutorials when they are used.
 
-\paragraph control_sedFoam Control
+\paragraph control_sedExnerFoam Control
 
 Input data related to the control of time and reading and writing of the solution data are read from the controlDict dictionary. The user should view this file as a case control file, it is located in the *system* directory.
 
@@ -301,7 +301,7 @@ As the simulation progresses we wish to write results at certain intervals of ti
 OpenFOAM creates a new directory named after the current time, e.g. 20 s, on each occasion that it writes a set of data. For this case, the entries in the controlDict are shown below:
 
 \verbatim
-application     sedFoam;
+application     sedExnerFoam;
 
 startFrom       latestTime;
 

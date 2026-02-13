@@ -1,7 +1,7 @@
 /**
  * \file        faq.doc
- * \author      Cyrille Bonamy and Julien Chauchat
- * \date        June 03, 2021
+ * \author      Matthias Renaud, Cyrille Bonamy and Julien Chauchat
+ * \date        February 13, 2026
  * \brief       Answers to FAQ (doc)
  */
 /*! \page faq Frequently Asked Questions
@@ -9,55 +9,28 @@
 
 \tableofcontents
 
-Here is a list of Frequently Asked Questions about sedFoam:
+Here is a list of Frequently Asked Questions about sedExnerFoam:
 
-\section sedfoam_app Which non-standard applications does sedFoam consist?
+\section sedexnerfoam_app Which non-standard applications does sedExnerFoam consist?
+The sedExnerFoam solver is specifically developed to address a range of non-standard applications in the field of sediment transport and morphodynamics. It excels in simulating complex phenomena such as the migration of dunes under steady flow conditions, which is particularly challenging for traditional models. The solver also handles highly non-uniform flow regions, like those found near obstacles, by employing adaptive meshing techniques to maintain accurate hydrodynamics. Using the Arbitrary Lagrangian Eulerian (ALE) method, sedExnerFoam dynamically tracks the bed interface over time, allowing the sediment bed to act as a moving boundary. Additionally, it provides a robust 3D Exner-based framework for detailed sediment transport and morphological evolution, making it highly suitable for engineering applications that demand precise and dynamic simulations.
 
-SedFoam is an Eulerian two-phase model for a wide range of sediment transport processes. By solving the mass and momentum equations for the water phase and fluid phase with closure on turbulence, particle stress, and interphase momentum coupling, SedFoam resolves the full dynamics of sediment transport throughout the entire water column and down to the immobile porous sediment bed without the need to artificially separate transport into near-bed load and suspended load layers. Compared with the conventional single-phase sediment transport model, SedFoam does not require empirical closures on reference concentration, bedload transport rate, and Exner equation for updating the bathymetry evolution.
+\section parallel Are sedExnerFoam applications parallel?
 
-\section parallel Are sedFoam applications parallel?
+sedExnerFoam applications are parallel, thanks to the inherent parallel computing capabilities of the OpenFOAM framework. This allows users to distribute computational workloads across multiple cores, significantly improving efficiency and reducing simulation time for large or complex cases.
+However, there is currently a limitation: the moving boundary representing the sediment bed must remain within the same subdomain or core during parallel computations. This constraint means that while the solver benefits from parallel processing for most of the domain, the dynamic bed interface is not fully decomposed across multiple processors. This aspect is important to consider when setting up simulations involving significant bed movement or deformation.
 
-sedFoam is parallel (many thanks to openfoam)
+\section industry Is there any example that sedExnerFoam was applied onto industry-related engineering problems?
 
-\section industry Is there any example that sedFoam was applied onto industry-related engineering problems?
+sedExnerFoam was developed through a collaboration between academic institutions (University of Grenoble Alpes, CNRS) and the engineering firm ARTELIA Group, aiming to provide an open-source tool for sediment transport and morphodynamics studies—especially for hydraulic structures.
+Its numerical approach, validated by academic benchmarks, addresses engineering-relevant challenges such as scour around bridge piers and dune migration, offering detailed resolution of flow-sediment interactions
 
-sedFoam has been used for Three-dimensional scour simulations (cf. paper in Advances in Water Resources : https://doi.org/10.1016/j.advwatres.2020.103544). The French company, Artelia, plans to use the software in its activities but the cost of calculation is prohibitive for 3D calculations on real scale cases.
+\section limitations What are the limitations of sedExnerFoam; what remains unresolved?
 
-\section limitations What are the limitations of sedFoam; what remains unresolved?
-
-From an industrial point of view, it is surely the computational cost. A model resolving a mixture can improve the model.
-And there is a lot of possible improvement : update of the kinetic theory (Done!), implementation of the finite size model in the official sedfoam release : http://dx.doi.org/10.1017%2Fjfm.2021.4, integrate the dilatancy effects (Done!), implementation of dynamic mesh functionality... We work on all that.
+sedExnerFoam has key limitations: the moving sediment bed must stay within a single subdomain in parallel computations, empirical closures for bedload and erosion introduce uncertainties, and near-bed processes are mesh-sensitive.
+The Arbitrary Lagrangian-Eulerian (ALE) method, while effective for dynamic bed tracking, can struggle with extreme bed deformation or shock-like slope changes, potentially causing numerical instability.
 
 \section maintain_duration Roughly, how long do you or your colleagues plan to maintain sedFoam?
 
-Cyrille Bonamy, Julien Chauchat, Tian-Jian Hsu and other people involved in the project do not plan to stop the maintenance of the software. We are three people with a permanent position, and so there is no problem for the next few years.
-
-\section CFL How to choose the CFL number?
-
-sedFoam is based on the PISO algorithm which is an unsteady flow algorithm even when we are looking at steady-state solutions. Another point is the coupling between the two-phase which adds another constraint on the time step. The choice of the time step also depends on the ddt scheme that you are using, values of order unity is possible when using upwind schemes but lower values are required when using second order temporal schemes such as backward or Crank-Nicholson scheme. According to our experience, it is necessary to use a CFL number smaller than unity and sometimes smaller than 0.3 or even less (0.1). The stability of the model remains a difficult problem and more theoretical work is needed to improve this point. 
-
-\section alphaMax How to choose the alphaMax value?
-
-alphaMax is prescribed in different places in the code and has different meanings. Here is a quick overview, the value set in ppPropertiesDict corresponds to the maximum packing fraction which for sphere is 0.635, the value set in granularRheologyProperties, denoted as alphaMaxG, corresponds to the maximum packing fraction in the phi(I) or phi(Iv) rheology and the value set in kineticTheoryProperties corresponds to the maximum packing fraction for the kinetic theory closures.
-
-\section relaxPa What is the meaning of relaxPa?
-
-relaxPa is a coefficient that controls the shear induced pressure relaxation toward the predicted value by the phi(I) or phi(Iv) rheology considered as the steady-state solution. The relaxation time-scale is given by:
-
-T_relaxPa = 1/(relaxPa alpha magD)
-
-where magD is the magnitude of the velocity shear rate. This equation is solve in granularRheology.solve(...). A smaller value of relaxPa increases the relaxation time-scale and increases the stability while a larger value decreases the time-scale and leads to more unstable solution (the steady-state solution is imposed more instantaneously). 
-
-\section SUS Which value shall I use for SUS?
-
-SUS corresponds to the inverse of the turbulent Schmidt number, according to van Rijn (1984) its values is an increasing function of Ws/u* as: 
-
-SUS = 1 + 2 (Ws/u*)^2
-
-in the range Ws/u* [0;1] and shall not exceed 3. 
-
-The user can either use a constant value in twophaseRASProperties or activate the local model by switching on SUSlocal in the same file (default is false). In the local model, u* is replaced by the squareroot of the local magnitude of the Reynolds Shear stress. The local value is clipped to 3.
-
-Van Rijn, L. C. (1984). Sediment transport, part ii: Suspended load transport. J. Hydraul. Eng., 110:1613–1641.
+Matthias Renaud, Cyrille Bonamy, Julien Chauchat, Olivier Bertrand and other people involved in the project do not plan to stop the maintenance of the software. We are three people with a permanent position, and so there is no problem for the next few years.
 
 */

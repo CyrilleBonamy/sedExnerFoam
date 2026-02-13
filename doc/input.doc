@@ -1,15 +1,15 @@
 /**
  * \file        input.doc
- * \author      Cyrille Bonamy and Julien Chauchat
- * \date        June 03, 2021
+ * \author      Matthias Renaud, Cyrille Bonamy and Julien Chauchat
+ * \date        February 13, 2026
  * \brief       Input parameters (doc)
  */
 /*! \page inputs Input Parameters
-@brief Description of the sedFoam input parameters
+@brief Description of the sedExnerFoam input parameters
 
 \tableofcontents
 
-The input parameters for sedFoam are numerous and are modifiable through different files in the current working directory. Some of the files are identical to other openFoam solvers and won't be described in details herein. This is the case for the files:
+The input parameters for sedExnerFoam are numerous and are modifiable through different files in the current working directory. Some of the files are identical to other openFoam solvers and won't be described in details herein. This is the case for the files:
 
 \verbatim
 system/blockMesh
@@ -22,7 +22,7 @@ The file 'blockMesh' contains the description of the mesh (see \ref meshgen). Th
 
 The keyword 'faceMomentum' in  the PIMPLE dictionary of the file system/fvSolution corresponds to solving the explicit shear stress terms at the cell faces and added in pEqn when set to false (the solver is using the code given in the pUf folder) and they are the cell centers and added in UEqn using the keyword 'faceMomentum' = true (the solver is using the code given in the pU folder) which is the default value.
 
-The files that contain the specific input parameters for sedFoam are:
+The files that contain the specific input parameters for sedExnerFoam are:
 
 \verbatim
 constant/g
@@ -41,7 +41,7 @@ The file 'g' contains the gravity vector. The user shall be careful when using a
 
 \section inputParams Physical processes
 
-sedFoam includes a variety of physical processes: fluid-particle forces such as drag force, fluid and particle phase rheology, elastic pressure for the solid phase, turbulence modeling. Each process can be switched on or off. The various tutorials available with the source code give a good overview of different combination of physical processes. The table below lists the keywords used to switch on or off physical processes in sedFoam and the key input parameters.
+sedExnerFoam includes a variety of physical processes: fluid-particle forces such as drag force, fluid and particle phase rheology, elastic pressure for the solid phase, turbulence modeling. Each process can be switched on or off. The various tutorials available with the source code give a good overview of different combination of physical processes. The table below lists the keywords used to switch on or off physical processes in sedExnerFoam and the key input parameters.
 
 In the following the input parameters will be described file-by-file.
 
@@ -269,7 +269,7 @@ laminar            | laminar flow - no turbulence model (nutb=0)                
 RAS                | Reynolds Averaged turbulence model                                |
 LES                | Large-Eddy Simulation turbulence model                            |
 
-If simulationType=RAS is selected, the user needs to specify a turbulence model using the keyword 'RASModel' in the 'RAS' dictionary. All singlephase turbulence model can be selected and specific two-phase flow turbulence models are provided with sedFoam:
+If simulationType=RAS is selected, the user needs to specify a turbulence model using the keyword 'RASModel' in the 'RAS' dictionary. All singlephase turbulence model can be selected and specific two-phase flow turbulence models are provided with sedExnerFoam:
 
 RASModel                |   description                                                     |
 ------------------------|-------------------------------------------------------------------|

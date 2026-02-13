@@ -5,50 +5,50 @@
  * \brief       howtogit (doc)
  */
 /*! \page howtogit How To work with github
-@brief How To use github to contribute to sedFoam development
+@brief How To use github to contribute to sedExnerFoam development
 
 \tableofcontents
 
-Here is a How To about using and contributing to the development of sedFoam. This page is organized in two sections:
+Here is a How To about using and contributing to the development of sedExnerFoam. This page is organized in two sections:
 
 - \ref howtoclone 
 - \ref improvingsedfoam
 
 //****************************************
-\section howtoclone Simple user level: How to download and update sedFoam sources 
+\section howtoclone Simple user level: How to download and update sedExnerFoam sources 
 
-Cloning SedFoam GitHub repository and creating a local copy on your
+Cloning sedExnerFoam GitHub repository and creating a local copy on your
 computer:
 
-On https://github.com/SedFoam/sedfoam, there's a green button labeled Clone. Click the button 
+On https://github.com/SedFoam/sedExnerFoam, there's a green button labeled Clone. Click the button 
 to see the web address. This URL address must be copied to your clipboard. 
 In the terminal, navigate to the location on your computer where you would like to locate the repository. 
 Then, type the following git command to clone the repository:
 \verbatim
-git clone --recurse-submodules https://github.com/SedFoam/sedfoam.git
+git clone --recurse-submodules https://github.com/SedFoam/sedExnerFoam.git
 \endverbatim
 
-The cloning process takes a few seconds. SedFoam directory is created which contains the same list
+The cloning process takes a few seconds. sedExnerFoam directory is created which contains the same list
 of files and folders as the GitHub page. 
 
-SedFoam github repository is updated regularly and to stay up-to-date with the latest version it is not necessary
-to download SedFoam again. Instead, we recommend to execute the following command:
+sedExnerFoam github repository is updated regularly and to stay up-to-date with the latest version it is not necessary
+to download sedExnerFoam again. Instead, we recommend to execute the following command:
 \verbatim
 git pull
 \endverbatim
 
 Previous command will incorporate the changes from a remote repository
 into the your local directory. This command should only be invoked if you are a
-SedFoam user. If you are making changes to the code or developing new features
-for SedFoam, please take a look at the next section.
+sedExnerFoam user. If you are making changes to the code or developing new features
+for sedExnerFoam, please take a look at the next section.
 
 //****************************************
-\section improvingsedfoam Advanced user level: How to contribute to sedFoam development
+\section improvingsedfoam Advanced user level: How to contribute to sedExnerFoam development
 
 This part of the getting started guide provides an overview of the git actions
 beyond the basic commands explained in previous section. This tutorial is
 intended to be a guide for developers who want to contribute, collaborate and
-work with SedFoam community. By the end of this tutorial you will learn how
+work with sedExnerFoam community. By the end of this tutorial you will learn how
 to:
 - \ref createfork 
 - \ref createbranch 
@@ -63,32 +63,32 @@ to:
 
 First of all, we need to know that in a collective project we are all in the same
 page. Thus, there is a common repository everyone has access to. That's, once
-again: https://github.com/SedFoam/sedfoam.
+again: https://github.com/SedFoam/sedExnerFoam.
 
 To avoid unwanted modifications, irreversible mistakes, or untested new features, direct code changes in the common repository are not allowed. Instead,
 a maintainer needs to review and accept the commits from any developer who
 wants to contribute to the project.
 
-If you want to collaborate and create new content for SedFoam you should develop your 
+If you want to collaborate and create new content for sedExnerFoam you should develop your 
 changes in a GitHub fork. A fork is a copy of a repository which links
-the original repository (https://github.com/SedFoam/sedfoam) and your personal copy. 
+the original repository (https://github.com/SedFoam/sedExnerFoam) and your personal copy. 
 Forks allow you to edit the contents of your forked repository without
 impacting the original repository.
 
-In order to create your SedFoam fork go to https://github.com/SedFoam/sedfoam 
+In order to create your sedExnerFoam fork go to https://github.com/SedFoam/sedExnerFoam 
 and click the Fork button.
 Currently, your fork only exists on GitHub. To be able to work on the
 project, you need to clone it to your computer:
 \verbatim
-git clone --recurse-submodules https://github.com/USERNAME/sedfoam.git
+git clone --recurse-submodules https://github.com/USERNAME/sedExnerFoam.git
 \endverbatim
-Previous URL is found in your SedFoam fork. 
+Previous URL is found in your sedExnerFoam fork. 
 
 It is strongly recommended to keep your fork up to date by tracking the upstream repository that you forked. To do so, you need to add a
 remote:
 \verbatim
 # Add 'upstream' repo to list of remotes
-git remote add upstream https://github.com/SedFoam/sedfoam.git
+git remote add upstream https://github.com/SedFoam/sedExnerFoam.git
 
 # Verify the new remote named 'upstream'
 git remote -v
@@ -139,7 +139,7 @@ git pull is simply shortcut to run a  git fetch  and then a git merge
 \subsection createbranch Create branches
 
 Branching is the way to work on several versions of a repository at the same
-time. By default your repository has one branch named master (latest official
+time. By default your repository has one branch named main (latest official
 release), and one branch named develop (with the latest developments).
 Whenever you begin to develop a new feature, it's important to create a new
 branch (a copy of the develop branch). It is common to use a certain branch
@@ -170,7 +170,7 @@ git checkout Newfeature
 In some case, specially if you are developing a new feature with more people, you might be interested in cloning a specific branch. In order to clone a specific branch you should execute “git clone -b” and specify the branch you want to clone:
 
 \verbatim
-git clone -b branchToBeCloned https://github.com/USERNAME/sedfoam.git
+git clone -b branchToBeCloned https://github.com/USERNAME/sedExnerFoam.git
 \endverbatim 
 
 //****************************************
@@ -276,7 +276,7 @@ git push  #Merge changes from upstream into your gitlab repo (origin)
 Then, an error will pop up. A possible way to keep on and update your branch consist in preserving your changes to stash:
 \verbatim
 git stash #backup and hide changes
-git pull --rebase upstream master
+git pull --rebase upstream main
 git push
 git stash pop #restore backed up changes
 \endverbatim

@@ -1,7 +1,7 @@
 name: generate_docker
 on:
   push:
-    branches: ['main']
+    branches: ['develop']
 defaults:
   run:
     shell: bash

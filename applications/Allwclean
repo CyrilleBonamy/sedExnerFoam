@@ -3,6 +3,17 @@ cd "${0%/*}" || exit                            # Run from this directory
 #------------------------------------------------------------------------------
 set -x
 
-wclean
+echo "SHLVL=$SHLVL"
+echo "PID=$$"
+ps -fp $$
+
+if ! command -v wclean >/dev/null
+then
+    echo "$0: The OpenFOAM environment not set?" 1>&2
+    echo "    no 'wclean' command" 1>&2
+    exit 2
+fi
+
+wclean -all solvers
 
 #------------------------------------------------------------------------------

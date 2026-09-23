@@ -303,7 +303,7 @@ else if (saturationType == "semiImplicit")
         {
             qbEdgei = qbProjOld[neighbour[edgei]];
         }
-        vector divLsQb = (Lsat->value() / deltaT / (deltaT + Tsat->value()))
+        vector divLsQb = (Lsat->value()*deltaT / (deltaT + Tsat->value()))
             * (qbEdgei & LeProj[edgei])
             * (qbEdgei / (Foam::mag(qbEdgei) + SMALL));
 

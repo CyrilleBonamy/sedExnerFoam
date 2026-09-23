@@ -52,6 +52,7 @@ autoPtr<areaVectorField> qbPtr;  // total bedload
 autoPtr<areaScalarField> dHptr;  // bed elevation increment on faces
 autoPtr<scalarField> dHpointsPtr; // bed elevation increment on points
 autoPtr<areaScalarField> DEptr;  // deposition/erosion source term
+autoPtr<areaScalarField> dHCumulPtr;  // cumulated dH since last remesh
 autoPtr<scalarField> phiqbProjPtr;  // projected bedload flux through edges
 //autoPtr<areaVectorField> VelBfPtr;  // bed form velocity field
 //autoPtr<vectorField> VelBfEdgesPtr;  // bed form velocity on edges
@@ -136,6 +137,23 @@ morphoAccFactor =
     bedloadProperties.lookupOrDefault<scalar>("morphoAccFactor", 1);
 Info << "morphological acceleration factor is set to: "
 << morphoAccFactor << endl;
+
+// max fraction of the first fluid cell height that the bed level increment
+// dH may reach in one time step, used by bedCourantNo.H to bound deltaT
+scalar maxCoBed =
+    bedloadProperties.lookupOrDefault<scalar>("maxCoBed", 0.3);
+Info << "bed motion max Courant number, maxCoBed = "
+    << maxCoBed << endl;
+
+// min fraction of the first fluid cell height that the cumulated bed
+// displacement (since the last remesh) may reach before a remesh is
+// flagged as needed, used by remeshTrigger.H. Independent from maxCoBed:
+// maxCoBed protects one time step, remeshCoBed protects the accumulation
+// over many time steps between two remeshing events.
+scalar remeshCoBed =
+    bedloadProperties.lookupOrDefault<scalar>("remeshCoBed", 3.0);
+Info << "remesh trigger threshold, remeshCoBed = "
+    << remeshCoBed << endl;
 
 // list of patch to apply zeroDisplacements condition
 List<word> fixedFaPatchNames;
@@ -269,6 +287,7 @@ if (bed.exist())
         }
 
     }
+
 }
 
 // create fa fields if morphology on
@@ -615,6 +634,26 @@ if (bed.exist())
             ),
             bed.aMesh(),
             dimensionedScalar(dimVelocity, Zero)
+        )
+    );
+
+    // cumulated bed level increment since the last remesh, used by
+    // remeshTrigger.H. Reset to zero once an actual remesh is implemented
+    // and triggered; for now it only grows, for calibration purposes.
+    dHCumulPtr.reset
+    (
+        new areaScalarField
+        (
+            IOobject
+            (
+                "dHCumul",
+                runTime.timeName(),
+                bed.aMesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            bed.aMesh(),
+            dimensionedScalar(dimLength, Zero)
         )
     );
 

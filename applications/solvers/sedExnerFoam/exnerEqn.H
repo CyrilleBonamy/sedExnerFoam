@@ -142,6 +142,30 @@ if (filterExner)
     }
 }
 
+// PIMPLE <-> Exner sub-iteration: convergence monitoring and
+// under-relaxation of the bed level increment. dH is always the increment
+// over the whole time step, so its fixed point does not depend on zbRelax.
+// The first sub-iteration is not relaxed (nothing to relax against), which
+// gives back the former explicit behaviour when nOuterCorrectors = 1.
+{
+    scalarField& dHnew = dH.primitiveFieldRef();
+
+    if (zbIter > 0)
+    {
+        const scalar zbRes = gMax(mag(dHnew - dHiter));
+
+        Info<< "PIMPLE-Exner sub-iteration " << zbIter + 1
+            << ": max|dH - dH_prev| = " << zbRes << " m"
+            << (zbRes < zbTol ? " (converged)" : " (not converged)")
+            << endl;
+
+        dHnew = dHiter + zbRelax*(dHnew - dHiter);
+    }
+
+    dHiter = dHnew;
+    zbIter++;
+}
+
 if (bed.bedMotion())
 {
     #include "meshMove.H"

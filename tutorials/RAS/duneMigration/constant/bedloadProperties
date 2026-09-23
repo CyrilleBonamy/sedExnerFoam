@@ -53,7 +53,7 @@ exnerAdvection
 
 saturation
 {
-    type               "explicit"; //"none", "explicit", "implicit1D";
+    type               "explicit"; //"explicit"; //"none", "explicit", "implicit1D";
     Tsat               0.01;
     Lsat               0.005;
 }

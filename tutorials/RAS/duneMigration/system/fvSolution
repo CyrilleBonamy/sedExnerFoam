@@ -78,7 +78,7 @@ solvers
         relTol          0.001;
     }
 
-    "(kFinal|omegaFinal)"
+    "(kFinal|omegaFinal|CsFinal)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -90,7 +90,11 @@ solvers
 PIMPLE
 {
     momentumPredictor 0;
-    nOuterCorrectors  1;
+    nOuterCorrectors        7;
+    moveMeshOuterCorrectors yes;   // indispensable
+    zbRelax                 0.5;     // optionnel, ]0,1]
+    zbTol                   1e-6;  // en m, pour l'affichage seulement
+
     nCorrectors     1;
     nNonOrthogonalCorrectors 0;
     correctAlpha    0;

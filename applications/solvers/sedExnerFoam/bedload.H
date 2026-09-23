@@ -75,11 +75,7 @@ forAll(meshProj.S(), facei)
 // apply saturation time to compute bedload
 if (saturationType == "implicit1D")
 {
-    Info<<"Implicit saturation"<<endl;
-    //if (Tsat->value() > deltaT)
-    //{
-    //    qb += (deltaT / Tsat->value()) * (qsat - qb);
-    //}
+    Info << "Implicit saturation" << endl;
 
     // access to projected faMesh
     const projectedFaMesh& meshProj = bed.aProjMesh();
@@ -132,7 +128,7 @@ if (saturationType == "implicit1D")
 }
 else if (saturationType == "explicit")
 {
-    Info<<"Explicit saturation"<<endl;
+    Info << "Explicit saturation" << endl;
     // time step
     const scalar& deltaT = runTime.time().deltaT().value();
     scalar TsatLim = 2 * deltaT;
@@ -176,28 +172,22 @@ else if (saturationType == "explicit")
         scalar distNeighbour =
             Foam::mag(xFacesProj[neighbour[edgei]] - xEdgesProj[edgei]);
         // linear interpolate qb on edge i (centered scheme)
-        /*
         vector qbEdgei =
             (
                 distNeighbour * qbProjOld[owner[edgei]]
                 + distOwner * qbProjOld[neighbour[edgei]]
             )
             * (1 / (distOwner + distNeighbour));
-       */
         // upwind interpolate qb on edge i
-        vector qbEdgei = qbProjOld[owner[edgei]];
-    if ((qbProjOld[owner[edgei]] & LeProj[edgei]) < scalar(0.0))
-    {
-        qbEdgei = qbProjOld[neighbour[edgei]];
-    }
-
-        // upwind interpolate qsat on edge i
-        vector qsatEdgei = qsatProj[owner[edgei]];
-    if ((qsatProj[owner[edgei]] & LeProj[edgei]) < scalar(0.0))
-    {
-        qsatEdgei = qsatProj[neighbour[edgei]];
-    }
-
+        scalar faceFlux = qbEdgei & LeProj[edgei];
+        if (faceFlux >= 0)
+        {
+            qbEdgei = qbProjOld[owner[edgei]];
+        }
+        else
+        {
+            qbEdgei = qbProjOld[neighbour[edgei]];
+        }
         vector divLsQb = (deltaT * Lsat->value() / TsatCorr)
             * (qbEdgei & LeProj[edgei])
             * (qbEdgei / (Foam::mag(qbEdgei) + SMALL));
@@ -222,7 +212,6 @@ else if (saturationType == "explicit")
             
             forAll(bed.aMesh().boundary()[patchi], patchEdgei)
             {
-
                 // linear interpolation from face to edge
                 vector qbEdgei = meshProj.project(QbBound[patchEdgei]);
 
@@ -255,7 +244,6 @@ else if (saturationType == "explicit")
 }
 else if (saturationType == "semiImplicit")
 {
-
     const scalar& deltaT = runTime.time().deltaT().value();
 
     // access to projected faMesh
@@ -266,7 +254,6 @@ else if (saturationType == "semiImplicit")
     const vectorField& xEdgesProj = meshProj.edgeCentres();
     // projected edge vectors, oriented toward owner face
     const vectorField& LeProj = meshProj.Le();
-    //Info << "Le: " << LeProj << endl;
     // area of projected mesh faces
     const scalarField& SfProj = meshProj.S();
     // face owner list
@@ -301,20 +288,22 @@ else if (saturationType == "semiImplicit")
         scalar distNeighbour =
             Foam::mag(xFacesProj[neighbour[edgei]] - xEdgesProj[edgei]);
         // linear interpolate qb on edge i
-        // vector qbEdgei =
-        //     (
-        //         distNeighbour * qbProjOld[owner[edgei]]
-        //         + distOwner * qbProjOld[neighbour[edgei]]
-        //     )
-        //     * (1 / (distOwner + distNeighbour));
-
-        vector qbEdgei = qbProjOld[owner[edgei]];
-        if ((qbProjOld[owner[edgei]] & LeProj[edgei]) < scalar(0.0))
+        vector qbEdgei =
+            (
+                distNeighbour * qbProjOld[owner[edgei]]
+                + distOwner * qbProjOld[neighbour[edgei]]
+            )
+            * (1 / (distOwner + distNeighbour));
+        scalar faceFlux = qbEdgei & LeProj[edgei];
+        if (faceFlux >= 0)
+        {
+            qbEdgei = qbProjOld[owner[edgei]];
+        }
+        else
         {
             qbEdgei = qbProjOld[neighbour[edgei]];
         }
-
-        vector divLsQb = (Lsat->value()*deltaT / (deltaT + Tsat->value()))
+        vector divLsQb = (Lsat->value() / deltaT / (deltaT + Tsat->value()))
             * (qbEdgei & LeProj[edgei])
             * (qbEdgei / (Foam::mag(qbEdgei) + SMALL));
 
@@ -374,7 +363,7 @@ else if (saturationType == "semiImplicit")
 }
 else if (saturationType == "none")
 {
-    Info<<"No saturation"<<endl;
+    Info << "No saturation" << endl;
     qb = qsat;
 }
 else
@@ -388,7 +377,7 @@ else
 
 qb.correctBoundaryConditions();
 
-Info<<"Avalanche calculation"<<endl;
+Info << "Avalanche calculation" << endl;
 // additional bedload due to avalanche
 if (bedloadMod.avalanche())
 {

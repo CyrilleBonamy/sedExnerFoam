@@ -51,7 +51,6 @@ for (const label i : fixedPointsLabels)
 
 dispVals -= eg * dHpoints;
 
-
 // interpolate displacement on points, vertical orientation
 //dispVals -= patchInterp.faceToPointInterpolate(dH) * eg;
 
@@ -61,5 +60,6 @@ for (const label patchID : bed.bedPatchesID())
     Info << " m , min:" << gMin(dispVals & -eg);
     Info << " m , mean:" << gAverage(-dispVals & eg) << " m" << endl;
     pointDisplacement.boundaryFieldRef()[patchID] == dispVals;
-    pointDisplacement.correctBoundaryConditions();
 }
+
+pointDisplacement.correctBoundaryConditions();

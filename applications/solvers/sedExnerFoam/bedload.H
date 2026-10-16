@@ -235,7 +235,7 @@ else if (saturationType == "explicit")
     {
         const faPatch& patch = bed.aMesh().boundary()[patchi];
 
-        if (!patch.coupled())
+        if (not patch.coupled())
         {
             continue;
         }

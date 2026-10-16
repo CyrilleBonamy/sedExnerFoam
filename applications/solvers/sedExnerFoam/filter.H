@@ -63,7 +63,7 @@ inline scalar projectedMinEdgeDistance(const projectedFaMesh& meshProj)
     forAll(meshProj.mesh().boundary(), patchi)
     {
         const faPatch& patch = meshProj.mesh().boundary()[patchi];
-        if (!patch.coupled())
+        if (not patch.coupled())
         {
             continue;
         }
@@ -142,7 +142,7 @@ inline Field filterField(
         forAll(meshProj.mesh().boundary(), patchi)
         {
             const faPatch& patch = meshProj.mesh().boundary()[patchi];
-            if (!patch.coupled())
+            if (not patch.coupled())
             {
                 continue;
             }
@@ -234,7 +234,7 @@ inline scalarField projectedLaplacian
     forAll(meshProj.mesh().boundary(), patchi)
     {
         const faPatch& patch = meshProj.mesh().boundary()[patchi];
-        if (!patch.coupled())
+        if (not patch.coupled())
         {
             continue;
         }

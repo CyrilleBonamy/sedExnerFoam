@@ -217,12 +217,30 @@ if (bed.exist())
                 Info << "filterExner type:"
                      << " Johnson and Zyserman with : alpha = "
                      << alphaExn << ", Nfilt = " << NExn << endl;
-            } else
+            }
+            else if (filterExnerType == "implicitBiharmonic")
+            {
+                alphaExn =
+                    filterExnerDict.lookupOrDefault<scalar>("alpha", 0.1);
+
+                if (alphaExn < 0)
+                {
+                    FatalError << "in bedloadProperties/filterExner,"
+                        << " alpha must be non-negative for "
+                        << "implicitBiharmonic" << endl;
+                    Info << abort(FatalError) << endl;
+                }
+
+                Info << "filterExner type: implicit biharmonic with "
+                     << "alpha = " << alphaExn << endl;
+            }
+            else
             {
                 FatalError << "in bedloadProperties/filterExner,"
                     << "wrong keyword for entry type "
                     << filterExnerType
-                    << "\nvalid options are: none, dZDiffusive JohnsonZyserman"
+                    << "\nvalid options are: none, dZDiffusive, "
+                    << "JohnsonZyserman, implicitBiharmonic"
                     << endl;
                 Info << abort(FatalError) << endl;
             }

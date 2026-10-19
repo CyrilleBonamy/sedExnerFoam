@@ -39,7 +39,7 @@ Info << "Instantiate sedimentBed" << endl;
 sedimentBed bed(bedloadProperties, mesh, g);
 
 // points displacements values for mesh motion
-autoPtr<vectorField> dispValsPtr;
+autoPtr<scalarField> dispValsPtr;
 
 // fields, variables for bedload and morphology
 autoPtr<areaVectorField> gradZbPtr;  // gradient of Zb, bed slope
@@ -350,13 +350,13 @@ if (bed.exist())
     }
 
     // vertices displacements for mesh motion
-    dispValsPtr.reset(new vectorField(bed.aMesh().nPoints()));
-    vectorField& dispVals = dispValsPtr.ref();
+    dispValsPtr.reset(new scalarField(bed.aMesh().nPoints()));
+    scalarField& dispVals = dispValsPtr.ref();
     // bed vertices vertical displacements, Exner equation
     dHpointsPtr.reset(new scalarField(bed.aMesh().nPoints()));
     for (label pointi = 0; pointi < bed.aMesh().nPoints(); pointi++)
     {
-        dispVals[pointi] = vector(0, 0, 0);
+        dispVals[pointi] = 0;
     }
 
     if (bedloadProperties.found("bedloadModel"))

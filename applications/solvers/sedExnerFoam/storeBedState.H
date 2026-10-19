@@ -47,7 +47,7 @@ if (bed.exist())
 //if (bed.bedMotion())
 //{
 //    const pointVectorField& pointDisplacement =
-//        mesh.objectRegistry::lookupObject<pointVectorField>("pointDisplacement");
+//  mesh.objectRegistry::lookupObject<pointVectorField>("pointDisplacement");
 //
 //    // Sauvegarder TOUT le champ, pas juste le dernier patch
 //    dispVals0 = pointDisplacement.primitiveField();

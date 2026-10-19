@@ -62,7 +62,7 @@ for (const label i : fixedPointsLabels)
     dHpoints[i] = 0.;
 }
 
-dispVals -= dHpoints;
+dispVals += dHpoints;
 
 //dispVals.replace(vector::X, 0.0);  // Force X = 0
 //dispVals.replace(vector::Y, 0.0);  // Force Y = 0

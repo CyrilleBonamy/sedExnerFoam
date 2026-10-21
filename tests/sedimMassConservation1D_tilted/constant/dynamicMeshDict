@@ -23,6 +23,8 @@ solver            displacementComponentLaplacian;
 displacementComponentLaplacianCoeffs
 {
     diffusivity     uniform 1;
+    component     z; 
+    applyPointLocation false;
 }
 
 // ************************************************************************* //

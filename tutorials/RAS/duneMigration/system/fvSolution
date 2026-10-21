@@ -90,10 +90,8 @@ solvers
 PIMPLE
 {
     momentumPredictor 0;
-    nOuterCorrectors        4;
+    nOuterCorrectors        1;
     moveMeshOuterCorrectors yes;   // indispensable
-    zbRelax                 0.5;     // optionnel, ]0,1]
-    zbTol                   1e-6;  // en m, pour l'affichage seulement
 
     nCorrectors     1;
     nNonOrthogonalCorrectors 0;

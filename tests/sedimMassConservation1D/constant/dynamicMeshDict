@@ -27,9 +27,5 @@ displacementComponentLaplacianCoeffs
     applyPointLocation false;
 
 }
-displacementLaplacianCoeffs
-{
-    diffusivity   quadratic inverseDistance (bed);
-}
 
 // ************************************************************************* //

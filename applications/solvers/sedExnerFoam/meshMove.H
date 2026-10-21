@@ -64,9 +64,6 @@ for (const label i : fixedPointsLabels)
 
 dispVals += dHpoints;
 
-//dispVals.replace(vector::X, 0.0);  // Force X = 0
-//dispVals.replace(vector::Y, 0.0);  // Force Y = 0
-
 // interpolate displacement on points, vertical orientation
 //dispVals -= patchInterp.faceToPointInterpolate(dH) * eg;
 

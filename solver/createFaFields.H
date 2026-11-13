@@ -152,7 +152,7 @@ if (bed.exist())
     
     word switchFilterExner =
         bedloadProperties.lookupOrDefault<word>("filterExner", "off");
-    if (switchFilterShields == "on")
+    if (switchFilterExner == "on")
     {
         filterExner = true;
         //alphaExn = bedloadProperties.lookupOrDefault<scalar>(
@@ -164,7 +164,7 @@ if (bed.exist())
     {
         FatalError << "in bedloadProperties,"
             << "wrong keyword for entry filterExner "
-            << switchFilterShields
+            << switchFilterExner
             << "\nvalid options are: on off" << endl;
             Info << abort(FatalError) << endl;
     }

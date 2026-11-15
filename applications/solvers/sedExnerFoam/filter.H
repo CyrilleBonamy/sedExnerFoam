@@ -128,10 +128,15 @@ inline Field filterField(
                 continue;
             }
 
+            // clip negative non-orthogonal weights
+            const scalar edgeWeight = Foam::max
+            (
+                (Xon & LeProj[edgei]) / XonMagSqr,
+                scalar(0)
+            );
             const valueType graddVe =
-                (((returnValue[neighbour[edgei]] - returnValue[owner[edgei]])
-                  * (Xon & LeProj[edgei]))
-                 / XonMagSqr);
+                (returnValue[neighbour[edgei]] - returnValue[owner[edgei]])
+                * edgeWeight;
 
             laplValue[owner[edgei]] +=
                 (Kex / SfProj[owner[edgei]]) * graddVe;
@@ -162,10 +167,15 @@ inline Field filterField(
 
                 if (XonMagSqr > VSMALL)
                 {
+                    // clip negative non-orthogonal weights
+                    const scalar edgeWeight = Foam::max
+                    (
+                        (Xon & LeProj[edgei]) / XonMagSqr,
+                        scalar(0)
+                    );
                     const valueType graddVe =
-                        ((valueBound[patchEdgei] - returnValue[own])
-                         * (Xon & LeProj[edgei]))
-                       / XonMagSqr;
+                        (valueBound[patchEdgei] - returnValue[own])
+                        * edgeWeight;
 
                     laplValue[own] +=
                         (Kex / SfProj[own]) * graddVe;
@@ -203,6 +213,9 @@ inline scalarField projectedLaplacian
 )
 {
     scalarField laplValue(value.size(), Zero);
+
+    // save exchange field so the caller's field (eg dH) is not modified
+    const scalarField exchangeOriginal(exchangeField.primitiveField());
 
     exchangeField.primitiveFieldRef() = value;
     exchangeField.correctBoundaryConditions();
@@ -268,6 +281,10 @@ inline scalarField projectedLaplacian
             edgei++;
         }
     }
+
+    // restore the caller's exchange field
+    exchangeField.primitiveFieldRef() = exchangeOriginal;
+    exchangeField.correctBoundaryConditions();
 
     return laplValue;
 }

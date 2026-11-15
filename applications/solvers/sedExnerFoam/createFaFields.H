@@ -180,11 +180,39 @@ if (bed.exist())
 
     if (bedloadProperties.found("filterExner"))
     {
+        // accept both the sub-dictionary syntax and the legacy
+        // "filterExner on/off;" word entry
+        const dictionary emptyFilterDict;
         const dictionary& filterExnerDict =
-            bedloadProperties.subDict("filterExner");
+            bedloadProperties.isDict("filterExner")
+          ? bedloadProperties.subDict("filterExner")
+          : emptyFilterDict;
 
-        filterExnerType =
-            filterExnerDict.lookupOrDefault<word>("type", "dZDiffusive");
+        if (bedloadProperties.isDict("filterExner"))
+        {
+            filterExnerType =
+                filterExnerDict.lookupOrDefault<word>("type", "dZDiffusive");
+        }
+        else
+        {
+            word legacySwitch =
+                bedloadProperties.lookupOrDefault<word>("filterExner", "off");
+            if (legacySwitch == "on")
+            {
+                filterExnerType = "dZDiffusive";
+            }
+            else if (legacySwitch == "off")
+            {
+                filterExnerType = "none";
+            }
+            else
+            {
+                FatalError << "in bedloadProperties,"
+                    << "wrong keyword for entry filterExner " << legacySwitch
+                    << "\nvalid options are: on off" << endl;
+                Info << abort(FatalError) << endl;
+            }
+        }
 
         if (filterExnerType != "none")
         {
@@ -259,11 +287,24 @@ if (bed.exist())
 
     if (bedloadProperties.found("filterShields"))
     {
-
+        // accept both the sub-dictionary syntax and the legacy
+        // "filterShields on/off;" word entry
+        const dictionary emptyFilterDict;
         const dictionary& filterShieldsDict =
-            bedloadProperties.subDict("filterShields");
-        filterShieldsSwitch =
-            filterShieldsDict.lookupOrDefault<word>("switch", "off");
+            bedloadProperties.isDict("filterShields")
+          ? bedloadProperties.subDict("filterShields")
+          : emptyFilterDict;
+
+        if (bedloadProperties.isDict("filterShields"))
+        {
+            filterShieldsSwitch =
+                filterShieldsDict.lookupOrDefault<word>("switch", "off");
+        }
+        else
+        {
+            filterShieldsSwitch =
+                bedloadProperties.lookupOrDefault<word>("filterShields", "off");
+        }
 
         if (filterShieldsSwitch == "on")
         {

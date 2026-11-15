@@ -115,7 +115,8 @@ if (filterExner)
         else if (filterExnerType == "JohnsonZyserman")
         {
 
-            scalarField zB(aMesh.areaCentres().component(vector::Z));
+            // bed elevation along -eg (eg = g/|g|, eg = (0 -1 0) here)
+            scalarField zB(-(aMesh.areaCentres() & eg));
             zB += dH.primitiveFieldRef();
 
             scalarField zBsm = filterField(

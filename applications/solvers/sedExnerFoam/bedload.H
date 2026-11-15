@@ -141,10 +141,12 @@ if (saturationType == "implicit1D")
         Amat[i][i-1] = -Mcoef;
         qsx[i] = qsat[i].x();
     }
-    Amat[0][0] = 1 - Mcoef;
-    Amat[0][1] = Mcoef;
-    Amat[Nf-1][Nf-1] = 1 + Mcoef;
-    Amat[Nf-1][Nf-2] = -Mcoef;
+    // one-sided differences at the boundaries: coefficient is Lsat/dl
+    scalar McoefB = Lsat->value() / dl;
+    Amat[0][0] = 1 - McoefB;
+    Amat[0][1] = McoefB;
+    Amat[Nf-1][Nf-1] = 1 + McoefB;
+    Amat[Nf-1][Nf-2] = -McoefB;
     qsx[0] = qsat[0].x();
     qsx[Nf-1] = qsat[Nf-1].x();
 

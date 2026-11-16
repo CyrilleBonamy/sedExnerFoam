@@ -80,7 +80,7 @@ Foam::sedimentBed::sedimentBed
 Foam::sedimentBed::~sedimentBed()
 {}
 
-// * * * * * * * * * * *  Public Member Functions * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * //
 
 const faMesh& Foam::sedimentBed::aMesh()
 {
@@ -245,7 +245,7 @@ void Foam::sedimentBed::interpFaceToVertices
     dHpoints /= normWeight;
 }
 
-// * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::sedimentBed::checkBedExistence()
 {
@@ -396,12 +396,12 @@ void Foam::sedimentBed::getCritShieldsModel()
     else
     {
         critShieldsModel_.reset
+        (
+            criticalShieldsModels::criticalShieldsModel::New
             (
-                criticalShieldsModels::criticalShieldsModel::New
-                (
-                    defaultCritShieldsDict
-                )
-            );
+                defaultCritShieldsDict
+            )
+        );
     }
 }
 

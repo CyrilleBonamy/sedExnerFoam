@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
     scalarField CsStart;
     scalarField dispVals0;  // bed points displacement at the beginning of
                             // the time step
+    scalarField dispValsApplied;  // displacement last applied to the mesh
     scalarField dHiter;     // bed level increment of previous sub-iteration
     label zbIter = 0;       // sub-iteration counter within the time step
 
@@ -154,10 +155,23 @@ int main(int argc, char *argv[])
         (
             pimple.dict().getOrDefault<scalar>("zbTol", 1e-6)
         );
+        // Skip the mesh update while the bed displacement increment since
+        // the last applied update stays below this threshold [m].
+        // 0 (default) always updates, as before.
+        const scalar meshMoveTol
+        (
+            pimple.dict().getOrDefault<scalar>("meshMoveTol", 0.0)
+        );
         if (zbRelax <= 0 || zbRelax > 1)
         {
             FatalErrorInFunction
                 << "PIMPLE/zbRelax must be in ]0, 1], got " << zbRelax
+                << exit(FatalError);
+        }
+        if (meshMoveTol < 0)
+        {
+            FatalErrorInFunction
+                << "PIMPLE/meshMoveTol must be >= 0, got " << meshMoveTol
                 << exit(FatalError);
         }
 
@@ -189,10 +203,30 @@ int main(int argc, char *argv[])
                 #include "storeBedState.H"
             }
 
-            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            bool moveMeshNow = (pimple.firstIter() || moveMeshOuterCorrectors);
+            if (bed.exist() && bed.bedMotion() && meshMoveTol > 0)
+            {
+                // The displacement is relative to the initial mesh and
+                // accumulates in dispVals across skipped updates. Skip the
+                // mesh update while the increment since the last applied
+                // update stays below meshMoveTol.
+                const scalarField& dispValsC = dispValsPtr.ref();
+                if (dispValsApplied.size() != dispValsC.size())
+                {
+                    dispValsApplied = scalarField(dispValsC.size(), Zero);
+                }
+                moveMeshNow =
+                    moveMeshNow
+                 && (gMax(mag(dispValsC - dispValsApplied)) > meshMoveTol);
+            }
+            if (moveMeshNow)
             {
                 // Do any mesh changes
-                mesh.controlledUpdate();
+                const bool meshMoved = mesh.controlledUpdate();
+                if (meshMoved && bed.exist() && bed.bedMotion())
+                {
+                    dispValsApplied = dispValsPtr.ref();
+                }
 
                 if (mesh.changing())
                 {

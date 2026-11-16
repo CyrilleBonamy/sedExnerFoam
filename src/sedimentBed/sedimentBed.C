@@ -385,23 +385,23 @@ void Foam::sedimentBed::getCritShieldsModel()
         if (modelType != "readFromFile")
         {
             critShieldsModel_.reset
-            (
-                criticalShieldsModels::criticalShieldsModel::New
                 (
-                    critShieldsDict
-                )
-            );
+                    criticalShieldsModels::criticalShieldsModel::New
+                    (
+                        critShieldsDict
+                    )
+                );
         }
     }
     else
     {
         critShieldsModel_.reset
-        (
-            criticalShieldsModels::criticalShieldsModel::New
             (
-                defaultCritShieldsDict
-            )
-        );
+                criticalShieldsModels::criticalShieldsModel::New
+                (
+                    defaultCritShieldsDict
+                )
+            );
     }
 }
 

@@ -76,4 +76,48 @@ else
     {
         phiqbProj[edgei] += qbAvEdge[edgei] & Le[edgei];
     }
+
+    // coupled (processor) edges: orient the projected edge normal with a
+    // global rule so that both processors compute the same avalanche flux
+    // vector; Le has opposite signs on the two sides of the interface,
+    // giving equal and opposite contributions in the bedload balance
+    const vector exP = meshProj.project(vector(1, 0, 0));
+    const vector eyP = meshProj.project(vector(0, 1, 0));
+    const vector ezP = meshProj.project(vector(0, 0, 1));
+
+    forAll(bed.aMesh().boundary(), patchi)
+    {
+        const faPatch& patch = bed.aMesh().boundary()[patchi];
+        if (not patch.coupled())
+        {
+            continue;
+        }
+
+        const vectorField& nEdgesB =
+            bed.aMesh().edgeAreaNormals().boundaryField()[patchi];
+        const vectorField& LeB = bed.aMesh().Le().boundaryField()[patchi];
+
+        label edgei = patch.start();
+        forAll(patch, patchEdgei)
+        {
+            vector nProj = meshProj.project(nEdgesB[patchEdgei]);
+            scalar s = nProj & exP;
+            if (Foam::mag(s) <= VSMALL) { s = nProj & eyP; }
+            if (Foam::mag(s) <= VSMALL) { s = nProj & ezP; }
+            if (s < 0) { nProj = -nProj; }
+
+            const scalar slopeAngleI = Foam::acos(nProj & eg);
+            vector slopeDirI = eg - nProj * (eg & nProj);
+            slopeDirI /= (Foam::mag(slopeDirI) + SMALL);
+
+            const scalarField betaI(1, slopeAngleI);
+            const vectorField dirI(1, slopeDirI);
+            const tmp<vectorField> qbAvT =
+                bedloadMod.qbAvalanche(betaI, dirI, betaRep);
+            const vector qbAvI = qbAvT()[0];
+
+            phiqbProj[edgei] += qbAvI & meshProj.project(LeB[patchEdgei]);
+            edgei++;
+        }
+    }
 }

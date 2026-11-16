@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
 Copyright (C) 2022 Matthias Renaud, Cyrille Bonamy, Julien Chauchat
                    and contributors
 
@@ -118,37 +118,78 @@ qavProj[neighbour[edgei]]) / (distOwner + distNeighbour);
 }
 
 // === BOUNDARY EDGES (CRITICAL FOR MASS CONSERVATION!) ===
+// make sure ghost (neighbour processor) values are up to date
+qav.correctBoundaryConditions();
+
 forAll(aMesh.boundary(), patchi)
 {
+    const faPatch& patch = aMesh.boundary()[patchi];
+
+    if (patch.type() == "empty")
+    {
+        continue;
+    }
+
+    const bool coupled = patch.coupled();
     const faPatchField<vector>& QbBound = qb.boundaryField()[patchi];
     const faPatchField<vector>& QavBound = qav.boundaryField()[patchi];
 
-    if (aMesh.boundary()[patchi].type() != "empty")
+    label edgei = patch.start();
+    forAll(patch, patchEdgei)
     {
-        label edgei = aMesh.boundary()[patchi].start();
-        forAll(aMesh.boundary()[patchi], patchEdgei)
+        const vector edgeLeProj =
+            meshProj.project(aMesh.Le().boundaryField()[patchi][patchEdgei]);
+
+        const vector qbOwn = meshProj.project(qb[owner[edgei]]);
+        const vector qbGho = meshProj.project(QbBound[patchEdgei]);
+        const vector qavOwn = meshProj.project(qav[owner[edgei]]);
+        const vector qavGho = meshProj.project(QavBound[patchEdgei]);
+
+        vector qbEdgei;
+        vector qavEdgei;
+
+        if (coupled)
         {
-            const vector edgeLeProj =
-meshProj.project(aMesh.Le().boundaryField()[patchi][patchEdgei]);
-
-            vector qbEdgei = meshProj.project(QbBound[patchEdgei]);
-            vector qavEdgei = meshProj.project(QavBound[patchEdgei]);
-
+            // processor edge: apply the same scheme as on internal edges,
+            // using the ghost value as the neighbour face, so that both
+            // processors compute the same physical flux (Le has opposite
+            // signs on the two sides, giving equal and opposite
+            // contributions in the dVsed balance, hence conservative)
+            if (qbScheme == "centered")
+            {
+                qbEdgei = 0.5*(qbOwn + qbGho);
+            }
+            else  // upwind, sign taken from the centered flux
+            {
+                const vector qbC = 0.5*(qbOwn + qbGho);
+                qbEdgei =
+                    ((qbC & edgeLeProj) >= scalar(0.0)) ? qbOwn : qbGho;
+            }
+            if (qavScheme == "centered")
+            {
+                qavEdgei = 0.5*(qavOwn + qavGho);
+            }
+            else
+            {
+                const vector qavC = 0.5*(qavOwn + qavGho);
+                qavEdgei =
+                    ((qavC & edgeLeProj) >= scalar(0.0)) ? qavOwn : qavGho;
+            }
+        }
+        else
+        {
+            // physical boundary: prescribed boundary value
+            qbEdgei = qbGho;
+            qavEdgei = qavGho;
             if (qavScheme == "upwind")
             {
-                if ((qavEdgei & edgeLeProj) >= scalar(0.0))
-                {
-                    qavEdgei = meshProj.project(QavBound[patchEdgei]);
-                }
-                else
-                {
-                    qavEdgei = meshProj.project(qav[owner[edgei]]);
-                }
+                qavEdgei = ((qavEdgei & edgeLeProj) >= scalar(0.0))
+                    ? qavGho : qavOwn;
             }
-
-            phiqbProj[edgei] = (qbEdgei + qavEdgei) & edgeLeProj;
-            edgei++;
         }
+
+        phiqbProj[edgei] = (qbEdgei + qavEdgei) & edgeLeProj;
+        edgei++;
     }
 }
 

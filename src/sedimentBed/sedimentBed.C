@@ -80,7 +80,7 @@ Foam::sedimentBed::sedimentBed
 Foam::sedimentBed::~sedimentBed()
 {}
 
-// * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * //
 
 const faMesh& Foam::sedimentBed::aMesh()
 {
@@ -217,11 +217,35 @@ void Foam::sedimentBed::interpFaceToVertices
             normWeight[piGlob] += areaPF;
         }
     }
+    if (Pstream::parRun())
+    {
+        // map faMesh local point labels to global (volume mesh) point labels
+        const labelList& globLabels = aMesh_->patch().meshPoints();
+
+        // scatter local contributions into global point labels and sum them
+        // across processors, so that points shared by several processors
+        // (processor patches) get the total over all their adjacent faces
+        scalarField sumH(mesh_.nPoints(), Zero);
+        scalarField sumW(mesh_.nPoints(), Zero);
+        forAll(dHpoints, pi)
+        {
+            sumH[globLabels[pi]] += dHpoints[pi];
+            sumW[globLabels[pi]] += normWeight[pi];
+        }
+        reduce(sumH.data(), sumH.size(), sumOp<scalar>(), UPstream::msgType());
+        reduce(sumW.data(), sumW.size(), sumOp<scalar>(), UPstream::msgType());
+        forAll(dHpoints, pi)
+        {
+            dHpoints[pi] = sumH[globLabels[pi]];
+            normWeight[pi] = sumW[globLabels[pi]];
+        }
+    }
+
     // Normalise interpolation weights
     dHpoints /= normWeight;
 }
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 void Foam::sedimentBed::checkBedExistence()
 {
@@ -372,13 +396,13 @@ void Foam::sedimentBed::getCritShieldsModel()
     else
     {
         critShieldsModel_.reset
-        (
-            criticalShieldsModels::criticalShieldsModel::New
             (
-                defaultCritShieldsDict
-            )
-        );
+                criticalShieldsModels::criticalShieldsModel::New
+                (
+                    defaultCritShieldsDict
+                )
+            );
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

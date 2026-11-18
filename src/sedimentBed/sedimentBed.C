@@ -80,7 +80,7 @@ Foam::sedimentBed::sedimentBed
 Foam::sedimentBed::~sedimentBed()
 {}
 
-// * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * //
 
 const faMesh& Foam::sedimentBed::aMesh()
 {

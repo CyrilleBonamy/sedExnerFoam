@@ -80,7 +80,7 @@ Foam::sedimentBed::sedimentBed
 Foam::sedimentBed::~sedimentBed()
 {}
 
-// * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * * //
 
 const faMesh& Foam::sedimentBed::aMesh()
 {
@@ -171,11 +171,12 @@ void Foam::sedimentBed::interpFaceToVertices
     scalarField& dHpoints
 )
 {
-    // Access to face centers in projected horizontal plane
-    const vectorField& xFacesProj = aProjMesh_->areaCentres();
+    // Access to face centers in 3D (not the horizontal projection: the
+    // sub-triangle weights must not degenerate on steep beds)
+    const vectorField& xFaces3D = aMesh_->areaCentres();
 
-    // Access to points coordinates in projected horizontal plane
-    const vectorField& xPointsProj = aProjMesh_->pointCoords();
+    // Access to point coordinates in 3D
+    const pointField& xPoints3D = aMesh_->points();
 
     // normalise interpolation weight
     scalarField normWeight(aMesh_->nPoints());
@@ -185,7 +186,7 @@ void Foam::sedimentBed::interpFaceToVertices
     for (label facei=0; facei < aMesh_->nFaces(); facei++)
     {
         const face& f = aMesh_->faces()[facei];
-        const vector& xf = xFacesProj[facei];
+        const vector& xf = xFaces3D[facei];
         // number of vertices defining face f
         const label nVerts = f.size();
 
@@ -198,9 +199,9 @@ void Foam::sedimentBed::interpFaceToVertices
             scalar areaPF = 0;
 
             // vertices coordinates
-            const vector& xv = xPointsProj[piGlob];
-            const vector& xn = xPointsProj[f.nextLabel(pi)];
-            const vector& xp = xPointsProj[f.prevLabel(pi)];
+            const vector& xv = xPoints3D[piGlob];
+            const vector& xn = xPoints3D[f.nextLabel(pi)];
+            const vector& xp = xPoints3D[f.prevLabel(pi)];
 
             // vector from vertice to face center
             vector vp = xf - xv;
@@ -385,12 +386,12 @@ void Foam::sedimentBed::getCritShieldsModel()
         if (modelType != "readFromFile")
         {
             critShieldsModel_.reset
+            (
+                criticalShieldsModels::criticalShieldsModel::New
                 (
-                    criticalShieldsModels::criticalShieldsModel::New
-                    (
-                        critShieldsDict
-                    )
-                );
+                    critShieldsDict
+                )
+            );
         }
     }
     else

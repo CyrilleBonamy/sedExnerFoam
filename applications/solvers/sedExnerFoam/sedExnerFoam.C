@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
     scalarField CsStart;
     scalarField dispVals0;  // bed points displacement at the beginning of
                             // the time step
+    scalarField dispValsApplied;  // displacement last applied to the mesh
     scalarField dHiter;     // bed level increment of previous sub-iteration
     label zbIter = 0;       // sub-iteration counter within the time step
 
@@ -136,6 +137,46 @@ int main(int argc, char *argv[])
             << "PIMPLE/nOuterCorrectors > 1 but moveMeshOuterCorrectors is "
             << "off: the mesh only moves at the first outer iteration, so "
             << "the flow never sees the bed updated by the sub-iterations."
+            << endl;
+    }
+
+    // Initialise the displacement accumulator from the motion solver field
+    // on disk (restart-safe), so that skipped or capped mesh updates keep
+    // accumulating in dispVals across time steps
+    if (bed.exist() && bed.bedMotion() && dispValsPtr.valid())
+    {
+        dispValsApplied = scalarField(dispValsPtr.ref().size(), Zero);
+        if (mesh.foundObject<pointScalarField>("pointDisplacementz"))
+        {
+            const pointScalarField& pointDispz =
+                mesh.lookupObject<pointScalarField>("pointDisplacementz");
+            for (const label patchID : bed.bedPatchesID())
+            {
+                dispValsPtr.ref() =
+                    pointDispz.boundaryField()[patchID].patchInternalField();
+            }
+        }
+        else if (mesh.foundObject<pointVectorField>("pointDisplacement"))
+        {
+            const pointVectorField& pointDisp =
+                mesh.lookupObject<pointVectorField>("pointDisplacement");
+            for (const label patchID : bed.bedPatchesID())
+            {
+                dispValsPtr.ref() =
+                   -(
+                        pointDisp.boundaryField()[patchID].patchInternalField()
+                      & eg
+                    );
+            }
+        }
+    }
+
+    if (bed.exist() && bed.bedMotion() && not filterExner)
+    {
+        WarningInFunction
+            << "bedMotion is on but filterExner is off: consider "
+            << "filterExner { type implicitBiharmonic; } to damp bed-level "
+            << "oscillations before the face-to-vertex interpolation."
             << endl;
     }
 
@@ -154,11 +195,37 @@ int main(int argc, char *argv[])
         (
             pimple.dict().getOrDefault<scalar>("zbTol", 1e-6)
         );
+        // Skip the mesh update while the bed displacement increment since
+        // the last applied update stays below this threshold [m].
+        // 0 (default) always updates, as before.
+        const scalar meshMoveTol
+        (
+            pimple.dict().getOrDefault<scalar>("meshMoveTol", 0.0)
+        );
         if (zbRelax <= 0 || zbRelax > 1)
         {
             FatalErrorInFunction
                 << "PIMPLE/zbRelax must be in ]0, 1], got " << zbRelax
                 << exit(FatalError);
+        }
+        if (meshMoveTol < 0)
+        {
+            FatalErrorInFunction
+                << "PIMPLE/meshMoveTol must be >= 0, got " << meshMoveTol
+                << exit(FatalError);
+        }
+        // Cap the displacement applied at each mesh update to this
+        // fraction of the local height of the first fluid cell above
+        // the bed, to avoid cell inversion. 0 (default) = no cap.
+        const scalar meshMoveMaxFrac
+        (
+            pimple.dict().getOrDefault<scalar>("meshMoveMaxFrac", 0.0)
+        );
+        if (meshMoveMaxFrac < 0)
+        {
+            FatalErrorInFunction
+                << "PIMPLE/meshMoveMaxFrac must be >= 0, got "
+                << meshMoveMaxFrac << exit(FatalError);
         }
 
         if (LTS)
@@ -189,10 +256,114 @@ int main(int argc, char *argv[])
                 #include "storeBedState.H"
             }
 
-            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            bool moveMeshNow = (pimple.firstIter() || moveMeshOuterCorrectors);
+            if (bed.exist() && bed.bedMotion() && meshMoveTol > 0)
             {
+                // The displacement is relative to the initial mesh and
+                // accumulates in dispVals across skipped updates. Skip the
+                // mesh update while the increment since the last applied
+                // update stays below meshMoveTol.
+                const scalarField& dispValsC = dispValsPtr.ref();
+                if (dispValsApplied.size() != dispValsC.size())
+                {
+                    dispValsApplied = scalarField(dispValsC.size(), Zero);
+                }
+                moveMeshNow =
+                    moveMeshNow
+                 && (gMax(mag(dispValsC - dispValsApplied)) > meshMoveTol);
+            }
+            if (moveMeshNow)
+            {
+                // Cap the displacement applied at this update to a
+                // fraction of the local height of the first fluid cell
+                // above the bed, to avoid cell inversion. The unapplied
+                // remainder stays pending in dispVals.
+                const bool capDisp =
+                    bed.exist() && bed.bedMotion() && meshMoveMaxFrac > 0
+                 && dispValsPtr.valid();
+                if (capDisp)
+                {
+                    scalarField& dispValsR = dispValsPtr.ref();
+                    if (dispValsApplied.size() != dispValsR.size())
+                    {
+                        dispValsApplied =
+                            scalarField(dispValsR.size(), Zero);
+                    }
+
+                    // local height of the first fluid cell above each
+                    // bed face (same indexing as bedCourantNo.H),
+                    // interpolated to the bed points
+                    scalarField hFaces(bed.aMesh().nFaces(), Zero);
+                    for (const label patchID : bed.bedPatchesID())
+                    {
+                        const fvPatch& bedPatch = mesh.boundary()[patchID];
+                        forAll(bedPatch, facei)
+                        {
+                            hFaces[facei] =
+                               -(
+                                    mesh.C()[bedPatch.faceCells()[facei]]
+                                  - bed.aMesh().areaCentres()[facei]
+                                )
+                              & bed.aMesh().faceAreaNormals()[facei];
+                        }
+                    }
+                    scalarField hPoints(bed.aMesh().nPoints(), Zero);
+                    bed.interpFaceToVertices(hFaces, hPoints);
+
+                    scalarField applied(dispValsR.size());
+                    forAll(dispValsR, pointi)
+                    {
+                        const scalar cap = meshMoveMaxFrac*hPoints[pointi];
+                        applied[pointi] =
+                            dispValsApplied[pointi]
+                          + Foam::clamp
+                            (
+                                dispValsR[pointi] - dispValsApplied[pointi],
+                                -cap,
+                                cap
+                            );
+                    }
+
+                    // impose the capped displacement on the motion field
+                    if (mesh.foundObject<pointScalarField>(
+                            "pointDisplacementz"))
+                    {
+                        pointScalarField& pointDispz =
+                            mesh.lookupObjectRef<pointScalarField>
+                            (
+                                "pointDisplacementz"
+                            );
+                        for (const label patchID : bed.bedPatchesID())
+                        {
+                            pointDispz.boundaryFieldRef()[patchID] ==
+                                applied;
+                        }
+                    }
+                    else
+                    {
+                        pointVectorField& pointDisp =
+                            mesh.lookupObjectRef<pointVectorField>
+                            (
+                                "pointDisplacement"
+                            );
+                        for (const label patchID : bed.bedPatchesID())
+                        {
+                            pointDisp.boundaryFieldRef()[patchID] ==
+                                -applied*eg;
+                        }
+                    }
+                    dispValsApplied = applied;
+                }
+
                 // Do any mesh changes
-                mesh.controlledUpdate();
+                const bool meshMoved = mesh.controlledUpdate();
+                if (meshMoved && bed.exist() && bed.bedMotion())
+                {
+                    if (not capDisp)
+                    {
+                        dispValsApplied = dispValsPtr.ref();
+                    }
+                }
 
                 if (mesh.changing())
                 {

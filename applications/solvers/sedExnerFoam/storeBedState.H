@@ -52,33 +52,18 @@ if (bed.exist())
         // a pointScalarField ("pointDisplacementz"), displacementLaplacian
         // a pointVectorField ("pointDisplacement") from which only the
         // vertical component is kept.
-        if (mesh.foundObject<pointScalarField>("pointDisplacementz"))
+        if
+        (
+            mesh.foundObject<pointScalarField>("pointDisplacementz")
+         || mesh.foundObject<pointVectorField>("pointDisplacement")
+        )
         {
-            // displacementComponentLaplacian
-            const pointScalarField& pointDispz =
-                mesh.lookupObject<pointScalarField>("pointDisplacementz");
-
-            for (const label patchID : bed.bedPatchesID())
-            {
-                dispVals0 =
-                    pointDispz.boundaryField()[patchID].patchInternalField();
-            }
-        }
-        else if (mesh.foundObject<pointVectorField>("pointDisplacement"))
-        {
-            // displacementLaplacian
-            const pointVectorField& pointDisp =
-                mesh.lookupObject<pointVectorField>("pointDisplacement");
-
-            for (const label patchID : bed.bedPatchesID())
-            {
-                // keep only the vertical component
-                dispVals0 =
-                   -(
-                        pointDisp.boundaryField()[patchID].patchInternalField()
-                      & eg
-                    );
-            }
+            // Total bed displacement accumulated so far. dispVals is
+            // initialised from the motion solver field before the time
+            // loop (restart-safe) and keeps the unapplied remainder of
+            // skipped or capped mesh updates, so it must not be reset
+            // from the (possibly capped) boundary field here.
+            dispVals0 = dispValsPtr.ref();
         }
         else
         {
